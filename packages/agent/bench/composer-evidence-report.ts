@@ -52,7 +52,7 @@ function sha256Text(text: string): string {
 	return crypto.createHash("sha256").update(text).digest("hex");
 }
 
-async function sha256File(filePath: string): Promise<string | undefined> {
+export async function sha256File(filePath: string): Promise<string | undefined> {
 	try {
 		const data = await fs.readFile(filePath);
 		return crypto.createHash("sha256").update(data).digest("hex");
