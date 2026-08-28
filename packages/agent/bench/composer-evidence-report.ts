@@ -38,11 +38,13 @@ function isCaptureMode(value: unknown): value is CaptureMode {
 	return value === "print" || value === "tmux" || value === "hermes-mcp" || value === "trace-replay";
 }
 
-function parseManifest(text: string): ProvenanceManifest | undefined {
+export function parseManifest(text: string): ProvenanceManifest | undefined {
 	if (!text.trim()) return undefined;
 	try {
 		const parsed = JSON.parse(text) as unknown;
-		return typeof parsed === "object" && parsed !== null ? (parsed as ProvenanceManifest) : undefined;
+		return typeof parsed === "object" && parsed !== null && !Array.isArray(parsed)
+			? (parsed as ProvenanceManifest)
+			: undefined;
 	} catch {
 		return undefined;
 	}

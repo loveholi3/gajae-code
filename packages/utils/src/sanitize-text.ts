@@ -44,7 +44,9 @@ function sanitizeWellFormedText(text: string): string {
 	CONTROL_RE.lastIndex = 0;
 	if (CONTROL_RE.exec(text) === null) return text;
 
-	const stripped = text.indexOf(ESC_CHAR) === -1 ? text : Bun.stripANSI(text);
+	const stripped = text.indexOf(ESC_CHAR) === -1 ? text :
+        // @ts-expect-error Bun < 1.1.18 does not have stripANSI
+        (Bun.stripANSI ? Bun.stripANSI(text) : text.replace(/\x1b\[[0-9;]*m/g, ""));
 	CONTROL_RE.lastIndex = 0;
 	return stripped.replace(CONTROL_RE, "");
 }
