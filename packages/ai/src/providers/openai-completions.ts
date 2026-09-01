@@ -976,11 +976,18 @@ export const streamOpenAICompletions: StreamFunction<"openai-completions"> = (
 
 					const reasoningDetails = (choice.delta as any).reasoning_details;
 					if (reasoningDetails && Array.isArray(reasoningDetails)) {
+						let toolCallsById: Map<string, ToolCall> | undefined;
 						for (const detail of reasoningDetails) {
 							if (detail.type === "reasoning.encrypted" && detail.id && detail.data) {
-								const matchingToolCall = output.content.find(
-									b => b.type === "toolCall" && b.id === detail.id,
-								) as ToolCall | undefined;
+								if (!toolCallsById) {
+									toolCallsById = new Map();
+									for (const b of output.content) {
+										if (b.type === "toolCall" && b.id) {
+											toolCallsById.set(b.id, b);
+										}
+									}
+								}
+								const matchingToolCall = toolCallsById.get(detail.id);
 								if (matchingToolCall) {
 									matchingToolCall.thoughtSignature = JSON.stringify(detail);
 								}
