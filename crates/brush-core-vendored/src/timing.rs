@@ -80,7 +80,7 @@ mod tests {
 	use super::*;
 
 	#[test]
-	fn test_format_time() {
+	fn test_format_duration_non_posixly() {
 		assert_eq!(format_duration_non_posixly(&Duration::from_millis(0)), "0m0.000s");
 		assert_eq!(format_duration_non_posixly(&Duration::from_millis(1)), "0m0.001s");
 		assert_eq!(format_duration_non_posixly(&Duration::from_millis(123)), "0m0.123s");
@@ -92,5 +92,9 @@ mod tests {
 		assert_eq!(format_duration_non_posixly(&Duration::from_micros(1)), "0m0.000s");
 		assert_eq!(format_duration_non_posixly(&Duration::from_micros(999)), "0m0.000s");
 		assert_eq!(format_duration_non_posixly(&Duration::from_micros(1001)), "0m0.001s");
+
+		assert_eq!(format_duration_non_posixly(&Duration::from_secs(60)), "1m0.000s");
+		assert_eq!(format_duration_non_posixly(&Duration::from_millis(59999)), "0m59.999s");
+		assert_eq!(format_duration_non_posixly(&Duration::from_millis(61001)), "1m1.001s");
 	}
 }
