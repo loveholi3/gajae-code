@@ -163,8 +163,16 @@ export function injectAlibabaTokenPlanModels(models: Model[]): void {
 			models.splice(index, 1);
 		}
 	}
+
+	const existingMap = new Map<string, Model>();
+	for (const model of models) {
+		if (model.provider === "alibaba-token-plan") {
+			existingMap.set(model.id, model);
+		}
+	}
+
 	for (const metadata of [deepseek, qwen, qwenPreview]) {
-		const existing = models.find(model => model.provider === "alibaba-token-plan" && model.id === metadata.id);
+		const existing = existingMap.get(metadata.id);
 		if (existing) {
 			Object.assign(existing, metadata);
 		} else {
@@ -203,7 +211,15 @@ export function injectMuseSparkModels(models: Model[]): void {
 			maxLevel: Effort.XHigh,
 		},
 	};
-	const existing = models.find(model => model.provider === metadata.provider && model.id === metadata.id);
+
+	let existing: Model | undefined;
+	for (const model of models) {
+		if (model.provider === metadata.provider && model.id === metadata.id) {
+			existing = model;
+			break;
+		}
+	}
+
 	if (existing) {
 		Object.assign(existing, metadata);
 	} else {
@@ -335,8 +351,15 @@ export function injectJetBrainsJunieModels(models: Model[]): void {
 
 	const junieModels: Model[] = [...claudeModels, ...gptCompletionsModels, ...gptResponsesModels];
 
+	const existingMap = new Map<string, Model>();
+	for (const model of models) {
+		if (model.provider === "jetbrains-junie") {
+			existingMap.set(model.id, model);
+		}
+	}
+
 	for (const metadata of junieModels) {
-		const existing = models.find(model => model.provider === "jetbrains-junie" && model.id === metadata.id);
+		const existing = existingMap.get(metadata.id);
 		if (existing) {
 			Object.assign(existing, metadata);
 		} else {
