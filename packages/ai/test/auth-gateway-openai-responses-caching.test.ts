@@ -111,10 +111,21 @@ async function callGateway(body: unknown, token: string): Promise<OpenAIResponse
 }
 
 function extractAssistantText(res: OpenAIResponse): string {
-	for (const item of res.output ?? []) {
+	const output = res.output;
+	if (!output) return "";
+	for (let i = 0, len1 = output.length; i < len1; ++i) {
+		const item = output[i];
 		if (item.type !== "message") continue;
-		const block = item.content?.find(c => c.type === "output_text");
-		if (block?.text) return block.text;
+		const content = item.content;
+		if (!content) continue;
+		for (let j = 0, len2 = content.length; j < len2; ++j) {
+			const block = content[j];
+			if (block.type === "output_text") {
+				const text = block.text;
+				if (text) return text;
+				break;
+			}
+		}
 	}
 	return "";
 }
