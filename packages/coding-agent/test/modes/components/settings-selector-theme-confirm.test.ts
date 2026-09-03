@@ -1,3 +1,4 @@
+import { stripVTControlCharacters } from "node:util";
 import { afterAll, afterEach, beforeAll, beforeEach, describe, expect, it, vi } from "bun:test";
 import type { SettingPath } from "@gajae-code/coding-agent/config/settings";
 import { resetSettingsForTest, Settings, settings } from "@gajae-code/coding-agent/config/settings";
@@ -116,7 +117,7 @@ describe("SettingsSelectorComponent theme selection", () => {
 		component.handleInput("\x1b[B");
 		await Bun.sleep(1);
 
-		const title = component.render(120).find(line => Bun.stripANSI(line).includes("Dark Theme"));
+		const title = component.render(120).find(line => stripVTControlCharacters(line).includes("Dark Theme"));
 		expect(title).toContain(theme.getFgAnsi("accent"));
 		expect(theme.getFgAnsi("accent")).toBe("\u001b[38;2;94;200;255m");
 		await restoreThemePreview("red-claw");

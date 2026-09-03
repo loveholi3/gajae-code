@@ -1,3 +1,4 @@
+import { stripVTControlCharacters } from "node:util";
 import { beforeAll, describe, expect, it } from "bun:test";
 import type { AgentMessage } from "@gajae-code/agent-core";
 import { TreeSelectorComponent } from "../../../src/modes/components/tree-selector";
@@ -25,7 +26,7 @@ function render(tree: SessionTreeNode[], width = 120): string {
 		() => {},
 		() => {},
 	);
-	return Bun.stripANSI(selector.render(width).join("\n"));
+	return stripVTControlCharacters(selector.render(width).join("\n"));
 }
 
 describe("TreeSelectorComponent developer message rendering", () => {

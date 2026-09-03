@@ -1,3 +1,4 @@
+import { stripVTControlCharacters } from "node:util";
 import { afterAll, beforeAll, describe, expect, it } from "bun:test";
 import { ThinkingLevel } from "@gajae-code/agent-core";
 import { resetSettingsForTest, Settings } from "../src/config/settings";
@@ -47,7 +48,7 @@ afterAll(() => resetSettingsForTest());
 
 describe("status-line fallback model", () => {
 	it("renders the active fallback model from the session snapshot", () => {
-		const rendered = Bun.stripANSI(renderSegment("model", contextForModel("Fallback Model")).content);
+		const rendered = stripVTControlCharacters(renderSegment("model", contextForModel("Fallback Model")).content);
 
 		expect(rendered).toContain("Fallback Model");
 		expect(rendered).not.toContain("Primary Model");

@@ -1,3 +1,4 @@
+import { stripVTControlCharacters } from "node:util";
 import { afterAll, beforeEach, describe, expect, it } from "bun:test";
 import {
 	__markdownPerfCounters,
@@ -16,7 +17,7 @@ function advance(ms: number): void {
 }
 
 function plain(lines: string[]): string {
-	return Bun.stripANSI(lines.join("\n"));
+	return stripVTControlCharacters(lines.join("\n"));
 }
 
 function renderPlain(markdown: Markdown, width = 80): string {

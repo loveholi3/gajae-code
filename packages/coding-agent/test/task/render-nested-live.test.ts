@@ -1,3 +1,4 @@
+import { stripVTControlCharacters } from "node:util";
 import { beforeAll, describe, expect, it } from "bun:test";
 import { getThemeByName, setThemeInstance } from "@gajae-code/coding-agent/modes/theme/theme";
 import type { AgentProgress, TaskResultReceipt, TaskToolDetails } from "@gajae-code/coding-agent/task";
@@ -102,7 +103,7 @@ describe("task renderer: nested live rendering", () => {
 				theme!,
 			);
 			const lines = component.render(160);
-			return { lines, text: Bun.stripANSI(lines.join("\n")) };
+			return { lines, text: stripVTControlCharacters(lines.join("\n")) };
 		});
 	}
 
@@ -119,7 +120,7 @@ describe("task renderer: nested live rendering", () => {
 			{ expanded: false, isPartial: true, spinnerFrame: 0 },
 			theme,
 		);
-		return Bun.stripANSI(component.render(160).join("\n"));
+		return stripVTControlCharacters(component.render(160).join("\n"));
 	}
 
 	async function renderResult(result: TaskResultReceipt): Promise<string> {
@@ -134,7 +135,7 @@ describe("task renderer: nested live rendering", () => {
 			{ expanded: false, isPartial: false, spinnerFrame: 0 },
 			theme,
 		);
-		return Bun.stripANSI(component.render(160).join("\n"));
+		return stripVTControlCharacters(component.render(160).join("\n"));
 	}
 	it("renders the fast-mode glyph in live and final subagent panels", async () => {
 		const theme = (await getThemeByName("red-claw"))!;
@@ -249,7 +250,7 @@ describe("task renderer: nested live rendering", () => {
 			{ expanded: false, isPartial: true, spinnerFrame: 0 },
 			theme,
 		);
-		const rootText = Bun.stripANSI(rootComponent.render(160).join("\n"));
+		const rootText = stripVTControlCharacters(rootComponent.render(160).join("\n"));
 		expect(rootText).toContain("Completed sibling remains visible");
 		expect(rootText).toContain("Running sibling remains visible");
 		expect(rootText.indexOf("Completed sibling remains visible")).toBeLessThan(
@@ -337,9 +338,9 @@ describe("task renderer: nested live rendering", () => {
 		const originalNow = Date.now;
 		try {
 			Date.now = () => 20_000;
-			const first = Bun.stripANSI(component.render(160).join("\n"));
+			const first = stripVTControlCharacters(component.render(160).join("\n"));
 			Date.now = () => 35_000;
-			const second = Bun.stripANSI(component.render(160).join("\n"));
+			const second = stripVTControlCharacters(component.render(160).join("\n"));
 
 			const notice = "provider degraded: 2 subagents retrying on anthropic";
 			expect(first).toContain(notice);
@@ -457,7 +458,7 @@ describe("task renderer: nested live rendering", () => {
 		container.addChild(new FixedLines(["after"]));
 
 		const lines = container.render(80);
-		const text = Bun.stripANSI(lines.join("\n"));
+		const text = stripVTControlCharacters(lines.join("\n"));
 
 		expect(lines).toContain("before");
 		expect(lines).toContain("after");
@@ -507,9 +508,9 @@ describe("task renderer: nested live rendering", () => {
 		const originalNow = Date.now;
 		try {
 			Date.now = () => 20_000;
-			const first = Bun.stripANSI(component.render(160).join("\n"));
+			const first = stripVTControlCharacters(component.render(160).join("\n"));
 			Date.now = () => 35_000;
-			const second = Bun.stripANSI(component.render(160).join("\n"));
+			const second = stripVTControlCharacters(component.render(160).join("\n"));
 			const notice = "provider degraded: 2 subagents retrying on anthropic";
 			expect(first.split(notice).length - 1).toBe(1);
 			expect(first).toContain("Healthy child remains visible");
@@ -517,7 +518,7 @@ describe("task renderer: nested live rendering", () => {
 			expect(first).toContain("last provider progress 20s ago");
 			expect(second).toContain("last provider progress 35s ago");
 			expect(first).not.toContain("\t");
-			expect(component.render(40).every(line => Bun.stringWidth(Bun.stripANSI(line)) <= 40)).toBe(true);
+			expect(component.render(40).every(line => Bun.stringWidth(stripVTControlCharacters(line)) <= 40)).toBe(true);
 		} finally {
 			Date.now = originalNow;
 		}

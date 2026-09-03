@@ -1,3 +1,4 @@
+import { stripVTControlCharacters } from "node:util";
 import { beforeAll, describe, expect, it } from "bun:test";
 import { CommandPalette, type CommandPaletteEntry } from "../src/modes/components/command-palette";
 import { InputController } from "../src/modes/controllers/input-controller";
@@ -137,7 +138,7 @@ describe("CommandPalette", () => {
 			bindingHint: "Ctrl +P",
 		});
 		const rendered = palette.render(120);
-		expect(Bun.stripANSI(rendered.join("\n"))).toContain("Safe label next");
+		expect(stripVTControlCharacters(rendered.join("\n"))).toContain("Safe label next");
 		expect(rendered.join("\n")).not.toContain("\u001b]8;;https://example.test\u0007");
 		expect(rendered.join("\n")).not.toContain("\u001b[999m");
 		expect(rendered.join("\n")).not.toContain("\u001b[0m result");

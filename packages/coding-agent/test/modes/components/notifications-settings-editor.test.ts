@@ -1,3 +1,4 @@
+import { stripVTControlCharacters } from "node:util";
 import { beforeAll, describe, expect, it } from "bun:test";
 import {
 	type NotificationsConfigureCommitResult,
@@ -294,7 +295,7 @@ class FakeNotificationsOperations implements NotificationsEditorOperations {
 }
 
 function render(component: NotificationsSettingsEditorComponent, width = 120): string {
-	return Bun.stripANSI(component.render(width).join("\n"));
+	return stripVTControlCharacters(component.render(width).join("\n"));
 }
 
 function select(component: NotificationsSettingsEditorComponent, index: number): void {

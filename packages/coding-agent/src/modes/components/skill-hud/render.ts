@@ -1,3 +1,4 @@
+import { stripVTControlCharacters } from "node:util";
 import { truncateToWidth, visibleWidth } from "@gajae-code/tui";
 import {
 	collapsePlanningPipeline,
@@ -133,7 +134,7 @@ function appendOverflowMarker(row: string, width: number, protectedToken?: strin
 		if (tokenIndex >= 0) {
 			const prefix = row.slice(0, tokenIndex);
 			const tokenWidth = visibleWidth(protectedToken);
-			const plainPrefix = Bun.stripANSI(prefix).trimEnd();
+			const plainPrefix = stripVTControlCharacters(prefix).trimEnd();
 			const needsMarker = !plainPrefix.endsWith("…");
 			const prefixWidth = Math.max(0, width - tokenWidth - (needsMarker ? 1 : 0));
 			return `${truncateToWidth(prefix, prefixWidth)}${needsMarker ? "…" : ""}${protectedToken}`;

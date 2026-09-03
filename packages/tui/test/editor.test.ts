@@ -1196,7 +1196,7 @@ describe("Editor component", () => {
 
 			expect(markerIndex).toBeGreaterThanOrEqual(0);
 			expect(visibleWidth(line!.slice(0, markerIndex))).toBe(2);
-			expect(Bun.stripANSI(line!.replaceAll(CURSOR_MARKER, ""))).toContain("Describe the change");
+			expect(stripVTControlCharacters(line!.replaceAll(CURSOR_MARKER, ""))).toContain("Describe the change");
 		});
 
 		it("handles mixed ASCII and wide characters in wrapping", () => {

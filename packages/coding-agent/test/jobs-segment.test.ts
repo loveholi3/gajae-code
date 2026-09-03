@@ -1,3 +1,4 @@
+import { stripVTControlCharacters } from "node:util";
 import { afterAll, beforeAll, describe, expect, test } from "bun:test";
 import { resetSettingsForTest, Settings } from "../src/config/settings";
 import { STATUS_LINE_PRESETS } from "../src/modes/components/status-line/presets";
@@ -128,7 +129,7 @@ describe("jobs status-line segment", () => {
 			worstState: "running",
 		});
 
-		const rendered = Bun.stripANSI(component.render(120).join("\n"));
+		const rendered = stripVTControlCharacters(component.render(120).join("\n"));
 		expect(rendered).toContain("1");
 		expect(rendered).not.toContain("job running");
 	});
@@ -142,7 +143,7 @@ describe("jobs status-line segment", () => {
 			showSkillHud: false,
 		});
 
-		const rendered = Bun.stripANSI(component.render(120).join("\n"));
+		const rendered = stripVTControlCharacters(component.render(120).join("\n"));
 		expect(rendered).toContain("job running");
 	});
 });

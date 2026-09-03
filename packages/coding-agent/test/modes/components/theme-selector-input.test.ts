@@ -1,3 +1,4 @@
+import { stripVTControlCharacters } from "node:util";
 import { afterAll, afterEach, beforeAll, beforeEach, describe, expect, it, vi } from "bun:test";
 import { resetSettingsForTest, Settings, settings } from "@gajae-code/coding-agent/config/settings";
 import { ThemeSelectorComponent } from "@gajae-code/coding-agent/modes/components/theme-selector";
@@ -74,7 +75,7 @@ describe("ThemeSelectorComponent input handling", () => {
 	it("renders the framed selector title", () => {
 		const { component } = createSelector();
 
-		expect(Bun.stripANSI(component.render(160).join("\n"))).toContain("Select theme");
+		expect(stripVTControlCharacters(component.render(160).join("\n"))).toContain("Select theme");
 	});
 
 	it("previews the newly selected theme from focused list navigation", () => {
@@ -99,7 +100,7 @@ describe("ThemeSelectorComponent input handling", () => {
 		component.getSelectList().handleInput("\x1b[B");
 		await Bun.sleep(1);
 
-		const title = component.render(160).find(line => Bun.stripANSI(line).includes("Select theme"));
+		const title = component.render(160).find(line => stripVTControlCharacters(line).includes("Select theme"));
 		expect(title).toContain(theme.getFgAnsi("accent"));
 		expect(theme.getFgAnsi("accent")).toBe("\u001b[38;2;94;200;255m");
 		await restoreThemePreview("red-claw");

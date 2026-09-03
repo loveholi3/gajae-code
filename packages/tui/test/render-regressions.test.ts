@@ -1,3 +1,4 @@
+import { stripVTControlCharacters } from "node:util";
 import { afterEach, beforeEach, describe, expect, it, vi } from "bun:test";
 import {
 	type Component,
@@ -87,7 +88,7 @@ class SemanticMutableLinesComponent implements Component {
 		let cellOffset = 0;
 		const anchors = this.#lines.map((line, index) => {
 			const id = this.#anchorIds[index];
-			const graphemeCount = [...Bun.stripANSI(line)].length;
+			const graphemeCount = [...stripVTControlCharacters(line)].length;
 			const cellCount = Math.max(1, Bun.stringWidth(line));
 			const anchor =
 				id === null || id === undefined

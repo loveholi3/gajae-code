@@ -1,9 +1,10 @@
+import { stripVTControlCharacters } from "node:util";
 import { beforeEach, describe, expect, it } from "bun:test";
 import { __markdownPerfCounters, clearRenderCache, Markdown } from "../src/components/markdown.js";
 import { defaultMarkdownTheme } from "./test-themes.js";
 
 function renderPlain(markdown: Markdown, width = 80): string {
-	return Bun.stripANSI(markdown.render(width).join("\n"));
+	return stripVTControlCharacters(markdown.render(width).join("\n"));
 }
 
 function freshRender(text: string, width = 80): string {

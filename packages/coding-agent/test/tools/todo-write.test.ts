@@ -1,3 +1,4 @@
+import { stripVTControlCharacters } from "node:util";
 import { describe, expect, it } from "bun:test";
 import { validateToolArguments } from "@gajae-code/ai";
 import { Settings } from "@gajae-code/coding-agent/config/settings";
@@ -515,7 +516,7 @@ describe("TodoWriteTool renderer", () => {
 			uiTheme,
 		);
 
-		const rendered = Bun.stripANSI(component.render(160).join("\n"));
+		const rendered = stripVTControlCharacters(component.render(160).join("\n"));
 		expect(rendered).toContain("Todo state persistence failed: disk failed");
 		expect(rendered).not.toContain("Rejected task");
 	});

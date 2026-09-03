@@ -1,3 +1,4 @@
+import { stripVTControlCharacters } from "node:util";
 import { afterEach, beforeEach, describe, expect, it, vi } from "bun:test";
 import * as fs from "node:fs/promises";
 import * as os from "node:os";
@@ -632,7 +633,7 @@ describe("vim renderer", () => {
 			uiTheme,
 		);
 
-		const rendered = Bun.stripANSI(component.render(160).join("\n"));
+		const rendered = stripVTControlCharacters(component.render(160).join("\n"));
 		expect(rendered).toContain("643G");
 		expect(rendered).toContain("line 1;");
 		expect(rendered).not.toContain("line 643;");
@@ -653,7 +654,7 @@ describe("vim renderer", () => {
 			uiTheme,
 		);
 
-		const rendered = Bun.stripANSI(component.render(140).join("\n"));
+		const rendered = stripVTControlCharacters(component.render(140).join("\n"));
 		expect(rendered).toContain("ggdGi");
 		expect(rendered).toContain("insert: replacement");
 		expect(rendered).not.toContain(">1│replacement");
@@ -680,7 +681,7 @@ describe("vim renderer", () => {
 			"growing-first-call-component",
 		);
 
-		let rendered = Bun.stripANSI(component.render(140).join("\n"));
+		let rendered = stripVTControlCharacters(component.render(140).join("\n"));
 		expect(rendered).toContain("insert: rep");
 
 		component.updateArgs(
@@ -692,7 +693,7 @@ describe("vim renderer", () => {
 			"growing-first-call-component",
 		);
 
-		rendered = Bun.stripANSI(component.render(140).join("\n"));
+		rendered = stripVTControlCharacters(component.render(140).join("\n"));
 		expect(rendered).toContain("insert: replacement text");
 	});
 

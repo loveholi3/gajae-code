@@ -1,3 +1,4 @@
+import { stripVTControlCharacters } from "node:util";
 import { afterAll, beforeAll, describe, expect, it } from "bun:test";
 import * as fs from "node:fs";
 import * as os from "node:os";
@@ -386,7 +387,7 @@ describe("status line multi-row wrapping (statusLine.maxRows)", () => {
 		return component;
 	}
 
-	const strip = (s: string): string => Bun.stripANSI(s);
+	const strip = (s: string): string => stripVTControlCharacters(s);
 
 	it("keeps the polished single row when everything fits", () => {
 		const lines = buildComponent(2).render(200);

@@ -1,3 +1,4 @@
+import { stripVTControlCharacters } from "node:util";
 /**
  * Minimal TUI implementation with differential rendering
  */
@@ -112,7 +113,7 @@ const MAX_CELL_DIMENSION_PX = 512;
 const DEVICE_REPORT_PATTERN = /^\x1b\[\?[\d;]*[cS]$/u;
 
 function stripTerminalControls(text: string): string {
-	return Bun.stripANSI(text)
+	return stripVTControlCharacters(text)
 		.replace(/\x1b\][\s\S]*?(?:\x07|\x1b\\)/gu, "")
 		.replace(/\x1b[P_^X][\s\S]*?\x1b\\/gu, "")
 		.replace(/\x1b(?:\[[0-?]*[ -/]*[@-~]|[@-_])/gu, "")
@@ -826,12 +827,12 @@ type KittyPlacementDeletePlan = {
 };
 
 function reflowBoundaryText(line: string): string {
-	return Bun.stripANSI(line).replace(/\s+/g, "");
+	return stripVTControlCharacters(line).replace(/\s+/g, "");
 }
 
 function findSafeReflowSuffixStart(previousFrameLines: string[], nextFrameLines: string[]): number {
-	const previousVisibleRows = previousFrameLines.map(line => Bun.stripANSI(line).replace(/[ \t]+$/g, ""));
-	const nextVisibleRows = nextFrameLines.map(line => Bun.stripANSI(line).replace(/[ \t]+$/g, ""));
+	const previousVisibleRows = previousFrameLines.map(line => stripVTControlCharacters(line).replace(/[ \t]+$/g, ""));
+	const nextVisibleRows = nextFrameLines.map(line => stripVTControlCharacters(line).replace(/[ \t]+$/g, ""));
 	for (let index = 0; index < Math.min(previousVisibleRows.length, nextVisibleRows.length); index++) {
 		if (
 			reflowBoundaryText(previousFrameLines[index]) === reflowBoundaryText(nextFrameLines[index]) &&
@@ -4604,8 +4605,8 @@ export class TUI extends Container {
 				// mistake that truncation for a stable durable boundary.
 				const previousFrameLines = previousLogicalFrame;
 				const hasPresentationMetadata =
-					previousRawFrame.some(line => !TERMINAL.isImageLine(line) && Bun.stripANSI(line) !== line) ||
-					rawLines.some(line => !TERMINAL.isImageLine(line) && Bun.stripANSI(line) !== line);
+					previousRawFrame.some(line => !TERMINAL.isImageLine(line) && stripVTControlCharacters(line) !== line) ||
+					rawLines.some(line => !TERMINAL.isImageLine(line) && stripVTControlCharacters(line) !== line);
 				const stableLogicalBoundary = hasPresentationMetadata
 					? -1
 					: findStableLogicalAppendBoundary(previousFrameLines, rawLines);

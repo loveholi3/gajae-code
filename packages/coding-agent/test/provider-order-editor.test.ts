@@ -1,3 +1,4 @@
+import { stripVTControlCharacters } from "node:util";
 import { afterEach, beforeAll, beforeEach, describe, expect, test, vi } from "bun:test";
 import type { ModelRegistry } from "@gajae-code/coding-agent/config/model-registry";
 import { resetSettingsForTest, type SettingPath, Settings, settings } from "@gajae-code/coding-agent/config/settings";
@@ -67,7 +68,7 @@ function editorFor(fixture: Fixture): ProviderOrderEditorComponent {
 }
 
 function render(editor: ProviderOrderEditorComponent): string {
-	return Bun.stripANSI(editor.render(120).join("\n"));
+	return stripVTControlCharacters(editor.render(120).join("\n"));
 }
 
 async function settlePersistence(): Promise<void> {
@@ -413,7 +414,7 @@ describe("SettingsSelectorComponent provider order integration", () => {
 		openProvidersTab(component);
 		component.handleInput("priority");
 
-		const rendered = Bun.stripANSI(component.render(120).join("\n"));
+		const rendered = stripVTControlCharacters(component.render(120).join("\n"));
 		expect(rendered).toContain("1 configured");
 		expect(rendered).not.toContain("2 configured");
 		component.dispose();
@@ -427,7 +428,7 @@ describe("SettingsSelectorComponent provider order integration", () => {
 
 		openProvidersTab(component);
 		component.handleInput("priority");
-		expect(Bun.stripANSI(component.render(120).join("\n"))).toContain("0 configured");
+		expect(stripVTControlCharacters(component.render(120).join("\n"))).toContain("0 configured");
 
 		component.handleInput("\n"); // Open the provider priority order editor.
 		component.handleInput("\n"); // Add provider.
@@ -438,7 +439,7 @@ describe("SettingsSelectorComponent provider order integration", () => {
 		component.handleInput("\x1b"); // Back to the order main page.
 		component.handleInput("\x1b"); // Close the editor.
 
-		const rendered = Bun.stripANSI(component.render(120).join("\n"));
+		const rendered = stripVTControlCharacters(component.render(120).join("\n"));
 		expect(rendered).toContain("1 configured");
 		expect(errors).toEqual([]);
 	});
@@ -526,7 +527,7 @@ describe("SettingsSelectorComponent provider order integration", () => {
 
 		openProvidersTab(component);
 		component.handleInput("priority");
-		const rendered = Bun.stripANSI(component.render(120).join("\n"));
+		const rendered = stripVTControlCharacters(component.render(120).join("\n"));
 		expect(rendered).toContain("2 configured");
 		expect(rendered).not.toContain("5 configured");
 		expect(errors).toEqual([]);

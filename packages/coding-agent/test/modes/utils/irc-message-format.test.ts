@@ -1,3 +1,4 @@
+import { stripVTControlCharacters } from "node:util";
 import { beforeEach, describe, expect, it } from "bun:test";
 import { IrcSplitViewComponent } from "@gajae-code/coding-agent/modes/components/irc-sidebar";
 import { IrcObservationLedger } from "@gajae-code/coding-agent/modes/irc-observation-ledger";
@@ -88,13 +89,13 @@ describe("formatIrcMessageBlock", () => {
 		const chatContainer = new Container();
 		const helpers = new UiHelpers({ chatContainer } as InteractiveModeContext);
 		helpers.addRebuiltIrcObservationToChat(parsed);
-		const inline = Bun.stripANSI(chatContainer.render(120).join("\n"));
+		const inline = stripVTControlCharacters(chatContainer.render(120).join("\n"));
 
 		const ledger = new IrcObservationLedger();
 		ledger.observe(parsed, false);
 		const split = new IrcSplitViewComponent(new Container(), ledger, theme);
 		split.setVisible(true);
-		const sidebar = Bun.stripANSI(split.render(200).join("\n"));
+		const sidebar = stripVTControlCharacters(split.render(200).join("\n"));
 		const block = formatIrcMessageBlock(parsed);
 		const header = `[IRC] ${block.sender} → ${block.recipient} · ${block.time}`;
 

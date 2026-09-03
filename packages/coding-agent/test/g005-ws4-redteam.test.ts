@@ -1,3 +1,4 @@
+import { stripVTControlCharacters } from "node:util";
 import { beforeAll, describe, expect, it } from "bun:test";
 import { createHash } from "node:crypto";
 import {
@@ -30,7 +31,7 @@ describe("G005 WS4 red-team", () => {
 		expect(overlay.snapshotHash).toBe(createHash("sha256").update(content).digest("hex"));
 		for (let index = 0; index < 10; index++) overlay.handleInput("\x1b[6~");
 		expect(overlay.pageOffset).toBeGreaterThan(0);
-		expect(overlay.render(20).every(line => Bun.stripANSI(line).length <= 20)).toBe(true);
+		expect(overlay.render(20).every(line => stripVTControlCharacters(line).length <= 20)).toBe(true);
 	});
 
 	it("uses SHA-256's first eight hexadecimal characters and preserves comment order", () => {
@@ -70,7 +71,7 @@ describe("G005 WS4 red-team", () => {
 			() => {},
 			() => {},
 		);
-		const rendered = Bun.stripANSI(overlay.render(20).join("\n"));
+		const rendered = stripVTControlCharacters(overlay.render(20).join("\n"));
 		for (const action of PLAN_REVIEW_ACTIONS) expect(rendered).toContain(action);
 	});
 });

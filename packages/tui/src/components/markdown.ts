@@ -1,3 +1,4 @@
+import { stripVTControlCharacters } from "node:util";
 import { LRUCache } from "lru-cache/raw";
 import { Marked, marked, type Token, Tokenizer, type Tokens } from "marked";
 import type { SymbolTheme } from "../symbols";
@@ -548,7 +549,7 @@ export class Markdown implements Component {
 				for (let j = 0; j < rowUnit.length; j++) {
 					const globalIdx = firstWrapped + j;
 					const line = wrappedLines[globalIdx];
-					if (!TERMINAL.isImageLine(line) && Bun.stripANSI(line).trim().length > 0) {
+					if (!TERMINAL.isImageLine(line) && stripVTControlCharacters(line).trim().length > 0) {
 						contentRowsByUnit[rowUnit[j]].push(globalIdx);
 					}
 				}
@@ -772,7 +773,7 @@ export class Markdown implements Component {
 					const ascii = this.#theme.resolveMermaidAscii(token.text);
 
 					if (ascii) {
-						for (const asciiLine of Bun.stripANSI(ascii).split("\n")) {
+						for (const asciiLine of stripVTControlCharacters(ascii).split("\n")) {
 							lines.push(asciiLine);
 						}
 						if (nextTokenType && nextTokenType !== "space") {

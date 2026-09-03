@@ -1,3 +1,4 @@
+import { stripVTControlCharacters } from "node:util";
 import { afterEach, beforeAll, beforeEach, describe, expect, it } from "bun:test";
 import type { AssistantMessage } from "@gajae-code/ai";
 import { resetSettingsForTest, Settings } from "@gajae-code/coding-agent/config/settings";
@@ -56,7 +57,7 @@ function assistantMessage(text: string): AssistantMessage {
 }
 
 function stripControls(text: string): string {
-	return Bun.stripANSI(text).replace(/\x1b\][^\x07]*(?:\x07|\x1b\\)/gu, "");
+	return stripVTControlCharacters(text).replace(/\x1b\][^\x07]*(?:\x07|\x1b\\)/gu, "");
 }
 
 function assertRowWidths(rows: string[], width: number): void {

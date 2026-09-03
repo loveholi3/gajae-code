@@ -1,3 +1,4 @@
+import { stripVTControlCharacters } from "node:util";
 import { afterAll, beforeAll, describe, expect, it } from "bun:test";
 import type { AgentTool } from "@gajae-code/agent-core";
 import type { TUI } from "@gajae-code/tui";
@@ -10,7 +11,7 @@ import { argsWithPartialJson } from "../src/modes/utils/ui-helpers";
 const ui = { requestRender() {} } as unknown as TUI;
 
 function rendered(component: { render(width: number): string[] }): string {
-	return Bun.stripANSI(component.render(140).join("\n"));
+	return stripVTControlCharacters(component.render(140).join("\n"));
 }
 
 function makeArgs(tool: string, i: number, sameLen = false): Record<string, unknown> {

@@ -1,3 +1,4 @@
+import { stripVTControlCharacters } from "node:util";
 import { beforeAll, describe, expect, it } from "bun:test";
 import type { AgentTool } from "@gajae-code/agent-core";
 import { resetSettingsForTest, Settings } from "@gajae-code/coding-agent/config/settings";
@@ -32,7 +33,7 @@ describe("editToolRenderer", () => {
 			uiTheme,
 		);
 
-		const rendered = Bun.stripANSI(component.render(160).join("\n"));
+		const rendered = stripVTControlCharacters(component.render(160).join("\n"));
 		expect(rendered).toContain("packages/coding-agent/src/edit/renderer.ts");
 	});
 	it("keeps all non-Vim live cards header-only while collapsed", async () => {
@@ -49,7 +50,7 @@ describe("editToolRenderer", () => {
 				{ expanded: false, isPartial: true, renderContext: { editMode } },
 				uiTheme,
 			);
-			expect(Bun.stripANSI(component.render(160).join("\n"))).not.toContain("SECRET_BODY");
+			expect(stripVTControlCharacters(component.render(160).join("\n"))).not.toContain("SECRET_BODY");
 		}
 	});
 	it("renders exact live target counts collapsed and payload detail expanded for every non-Vim mode", async () => {
@@ -80,13 +81,13 @@ describe("editToolRenderer", () => {
 		];
 		for (const { editMode, args, expectedDetail, editStreamingFallback } of modes) {
 			const renderContext = { editMode, editStreamingFallback };
-			const collapsed = Bun.stripANSI(
+			const collapsed = stripVTControlCharacters(
 				editToolRenderer
 					.renderCall(args, { expanded: false, isPartial: true, renderContext }, uiTheme)
 					.render(160)
 					.join("\n"),
 			);
-			const expanded = Bun.stripANSI(
+			const expanded = stripVTControlCharacters(
 				editToolRenderer
 					.renderCall(args, { expanded: true, isPartial: true, renderContext }, uiTheme)
 					.render(160)
@@ -138,8 +139,8 @@ describe("editToolRenderer", () => {
 			{ expanded: false, isPartial: false, renderContext: { editMode: "apply_patch" } },
 			uiTheme,
 		);
-		expect(Bun.stripANSI(create.render(160).join("\n"))).toContain("Create");
-		expect(Bun.stripANSI(del.render(160).join("\n"))).toContain("Delete");
+		expect(stripVTControlCharacters(create.render(160).join("\n"))).toContain("Create");
+		expect(stripVTControlCharacters(del.render(160).join("\n"))).toContain("Delete");
 	});
 
 	it("uses hashline input headers for streaming call path without apply_patch errors", async () => {
@@ -152,7 +153,7 @@ describe("editToolRenderer", () => {
 			uiTheme,
 		);
 
-		const rendered = Bun.stripANSI(component.render(160).join("\n"));
+		const rendered = stripVTControlCharacters(component.render(160).join("\n"));
 		expect(rendered).toContain("packages/coding-agent/src/edit/renderer.ts");
 		expect(rendered).not.toContain("The first line of the patch must be");
 	});
@@ -170,8 +171,8 @@ describe("editToolRenderer", () => {
 			uiTheme,
 		);
 
-		expect(Bun.stripANSI(partial.render(160).join("\n"))).not.toContain("*** End Patch");
-		expect(Bun.stripANSI(complete.render(160).join("\n"))).toContain("*** End Patch");
+		expect(stripVTControlCharacters(partial.render(160).join("\n"))).not.toContain("*** End Patch");
+		expect(stripVTControlCharacters(complete.render(160).join("\n"))).toContain("*** End Patch");
 	});
 	it("hides hashline envelope input while the live card is collapsed", async () => {
 		await getUiTheme();
@@ -189,7 +190,7 @@ describe("editToolRenderer", () => {
 			uiStub,
 		);
 
-		const rendered = Bun.stripANSI(component.render(160).join("\n"));
+		const rendered = stripVTControlCharacters(component.render(160).join("\n"));
 		expect(rendered).toContain("crates/pi-natives/src/shell.rs");
 		expect(rendered).not.toContain("»EOF");
 		expect(rendered).not.toContain("pub fn streaming_preview() {");
@@ -214,8 +215,8 @@ describe("editToolRenderer", () => {
 			uiTheme,
 		);
 
-		const compactRendered = Bun.stripANSI(compactComponent.render(160).join("\n"));
-		const quotedRendered = Bun.stripANSI(quotedComponent.render(160).join("\n"));
+		const compactRendered = stripVTControlCharacters(compactComponent.render(160).join("\n"));
+		const quotedRendered = stripVTControlCharacters(quotedComponent.render(160).join("\n"));
 		expect(compactRendered).toContain("foo bar.ts");
 		expect(quotedRendered).toContain("baz qux.ts");
 	});
@@ -240,8 +241,8 @@ describe("editToolRenderer", () => {
 			uiTheme,
 		);
 
-		const canonicalRendered = Bun.stripANSI(canonical.render(160).join("\n"));
-		const tripleRendered = Bun.stripANSI(triple.render(160).join("\n"));
+		const canonicalRendered = stripVTControlCharacters(canonical.render(160).join("\n"));
+		const tripleRendered = stripVTControlCharacters(triple.render(160).join("\n"));
 
 		expect(canonicalRendered).toContain("packages/coding-agent/src/slash-commands/builtin-registry.ts");
 		expect(canonicalRendered).not.toMatch(/§packages\/coding-agent/);
@@ -266,7 +267,7 @@ describe("editToolRenderer", () => {
 			},
 		);
 
-		const rendered = Bun.stripANSI(component.render(160).join("\n"));
+		const rendered = stripVTControlCharacters(component.render(160).join("\n"));
 		expect(rendered).toContain("packages/coding-agent/src/edit/renderer.ts");
 		expect(rendered).not.toContain(" …");
 	});
@@ -288,8 +289,8 @@ describe("editToolRenderer", () => {
 			uiTheme,
 			{ path: "request.ts" },
 		);
-		const successText = Bun.stripANSI(success.render(160).join("\n"));
-		const failureText = Bun.stripANSI(failure.render(160).join("\n"));
+		const successText = stripVTControlCharacters(success.render(160).join("\n"));
+		const failureText = stripVTControlCharacters(failure.render(160).join("\n"));
 		expect(successText).toContain("result.ts");
 		expect(successText).not.toContain("REQUEST_BODY");
 		expect(failureText).toContain("first cause");
@@ -308,7 +309,7 @@ describe("editToolRenderer", () => {
 			uiTheme,
 			{ path: "a.ts" },
 		);
-		expect(Bun.stripANSI(component.render(160).join("\n"))).toContain("full failure detail");
+		expect(stripVTControlCharacters(component.render(160).join("\n"))).toContain("full failure detail");
 	});
 	it("renders a represented partial file and pending target through the execution component", async () => {
 		await getUiTheme();
@@ -319,7 +320,7 @@ describe("editToolRenderer", () => {
 			{ content: [], details: { diff: "", perFileResults: [{ path: "a.ts", diff: "+done" }] } },
 			true,
 		);
-		const rendered = Bun.stripANSI(component.render(160).join("\n"));
+		const rendered = stripVTControlCharacters(component.render(160).join("\n"));
 		expect(rendered).toContain("a.ts");
 		expect(rendered).toContain("1 more file pending");
 	});
@@ -346,7 +347,7 @@ describe("editToolRenderer", () => {
 			uiTheme,
 			{ input: "§a.ts\n§b.ts\n§c.ts" },
 		);
-		const rendered = Bun.stripANSI(component.render(160).join("\n"));
+		const rendered = stripVTControlCharacters(component.render(160).join("\n"));
 		expect(rendered).toContain("a.ts:3");
 		expect(rendered).not.toContain(":99");
 		expect(rendered).toContain("failed a");
@@ -367,7 +368,7 @@ describe("editToolRenderer", () => {
 			uiTheme,
 			{ input: "§a\n»EOF\n§a\n»EOF\n§b" },
 		);
-		const rendered = Bun.stripANSI(component.render(160).join("\n"));
+		const rendered = stripVTControlCharacters(component.render(160).join("\n"));
 		expect(rendered).toContain("1 more file pending");
 	});
 
@@ -394,7 +395,7 @@ describe("editToolRenderer", () => {
 				],
 			},
 		);
-		const rendered = Bun.stripANSI(component.render(160).join("\n"));
+		const rendered = stripVTControlCharacters(component.render(160).join("\n"));
 		expect(rendered).toContain("Delete");
 		expect(rendered).toContain("b.ts:7");
 		expect(rendered).toContain("right.ts");
@@ -430,7 +431,7 @@ describe("editToolRenderer", () => {
 			},
 			true,
 		);
-		const rendered = Bun.stripANSI(component.render(160).join("\n"));
+		const rendered = stripVTControlCharacters(component.render(160).join("\n"));
 		const aLine = rendered.split("\n").find(line => line.includes("a.ts")) ?? "";
 		const bLine = rendered.split("\n").find(line => line.includes("b.ts")) ?? "";
 		expect(aLine).toContain("Create");
@@ -459,7 +460,7 @@ describe("editToolRenderer", () => {
 			{ edits: [{ path: "a.ts" }, { path: "b.ts" }, { path: "c.ts" }] },
 		);
 
-		expect(Bun.stripANSI(component.render(160).join("\n"))).not.toContain("pending");
+		expect(stripVTControlCharacters(component.render(160).join("\n"))).not.toContain("pending");
 	});
 
 	it("preserves Vim renderer delegation", async () => {
@@ -469,7 +470,7 @@ describe("editToolRenderer", () => {
 			{ expanded: false, isPartial: true, renderContext: { editMode: "vim" } },
 			uiTheme,
 		);
-		expect(Bun.stripANSI(component.render(160).join("\n"))).toContain("open sentinel-vim.ts");
+		expect(stripVTControlCharacters(component.render(160).join("\n"))).toContain("open sentinel-vim.ts");
 	});
 
 	it("changes live detail only when expanded", async () => {
@@ -493,8 +494,8 @@ describe("editToolRenderer", () => {
 			},
 			uiTheme,
 		);
-		expect(Bun.stripANSI(collapsed.render(160).join("\n"))).not.toContain("stream lifecycle detail");
-		expect(Bun.stripANSI(expanded.render(160).join("\n"))).toContain("stream lifecycle detail");
+		expect(stripVTControlCharacters(collapsed.render(160).join("\n"))).not.toContain("stream lifecycle detail");
+		expect(stripVTControlCharacters(expanded.render(160).join("\n"))).toContain("stream lifecycle detail");
 	});
 	it("keeps a single-path preview for a boxed partial result", async () => {
 		const uiStub = { requestRender() {} } as unknown as TUI;
@@ -516,7 +517,7 @@ describe("editToolRenderer", () => {
 			);
 			pending.resolve([{ path: "a.ts", diff: "", firstChangedLine: 7 }]);
 			for (let attempt = 0; attempt < 20; attempt++) await Promise.resolve();
-			expect(Bun.stripANSI(component.render(160).join("\n"))).toContain("a.ts:7");
+			expect(stripVTControlCharacters(component.render(160).join("\n"))).toContain("a.ts:7");
 		} finally {
 			strategy.computeDiffPreview = originalCompute;
 			component.dispose();
@@ -556,7 +557,7 @@ describe("editToolRenderer", () => {
 			uiTheme,
 			{ path: "a.ts" },
 		);
-		const rendered = Bun.stripANSI(component.render(160).join("\n"));
+		const rendered = stripVTControlCharacters(component.render(160).join("\n"));
 		expect(rendered).toContain("Diagnostics available");
 		expect(rendered).not.toContain("0 diagnostics");
 	});
@@ -604,8 +605,8 @@ describe("editToolRenderer", () => {
 			uiTheme,
 			{ path: "request.ts" },
 		);
-		const collapsedText = Bun.stripANSI(collapsed.render(160).join("\n"));
-		const expandedText = Bun.stripANSI(expanded.render(160).join("\n"));
+		const collapsedText = stripVTControlCharacters(collapsed.render(160).join("\n"));
+		const expandedText = stripVTControlCharacters(expanded.render(160).join("\n"));
 		expect(collapsedText).toContain("Delete");
 		expect(collapsedText).toContain("result.ts");
 		expect(collapsedText).toContain("moved.ts");
@@ -633,7 +634,7 @@ describe("editToolRenderer", () => {
 		);
 		const liveRaw = live.render(160).join("\n");
 		const completeRaw = complete.render(160).join("\n");
-		const completeText = Bun.stripANSI(completeRaw);
+		const completeText = stripVTControlCharacters(completeRaw);
 		expect(liveRaw).not.toContain("https://bad");
 		expect(completeRaw).not.toContain("https://bad");
 		expect(completeText).not.toContain("\nunsafe.ts");
@@ -683,7 +684,7 @@ describe("editToolRenderer", () => {
 			{ expanded: false, isPartial: true, renderContext: { editMode: "hashline" } },
 			uiTheme,
 		);
-		const rendered = Bun.stripANSI(component.render(160).join("\n"));
+		const rendered = stripVTControlCharacters(component.render(160).join("\n"));
 		expect(rendered).toContain("actual.ts");
 		expect(rendered).not.toContain("more)");
 		expect(rendered).not.toContain("default.ts");
@@ -701,8 +702,8 @@ describe("editToolRenderer", () => {
 			{ expanded: true, isPartial: false, renderContext: { editMode: "apply_patch" } },
 			uiTheme,
 		);
-		const deletedText = Bun.stripANSI(deleted.render(160).join("\n"));
-		const movedText = Bun.stripANSI(moved.render(160).join("\n"));
+		const deletedText = stripVTControlCharacters(deleted.render(160).join("\n"));
+		const movedText = stripVTControlCharacters(moved.render(160).join("\n"));
 
 		expect(deletedText).toContain("Delete");
 		expect(deletedText).toContain("old.ts");

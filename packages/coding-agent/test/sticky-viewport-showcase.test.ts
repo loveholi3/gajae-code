@@ -1,3 +1,4 @@
+import { stripVTControlCharacters } from "node:util";
 import { afterAll, afterEach, describe, expect, it } from "bun:test";
 import * as fs from "node:fs/promises";
 import * as os from "node:os";
@@ -209,7 +210,7 @@ async function recomputeAnchor(root: string, key: string): Promise<void> {
 		anchor.frame_start_row
 	]!;
 	const frameSha256 = new Bun.CryptoHasher("sha256").update(ansi).digest("hex");
-	const frameTextSha256 = new Bun.CryptoHasher("sha256").update(Bun.stripANSI(ansi)).digest("hex");
+	const frameTextSha256 = new Bun.CryptoHasher("sha256").update(stripVTControlCharacters(ansi)).digest("hex");
 	anchor.frame_sha256 = frameSha256;
 	anchor.frame_text_sha256 = frameTextSha256;
 	anchor.row_text_sha256 = new Bun.CryptoHasher("sha256").update(rowText).digest("hex");
@@ -497,13 +498,13 @@ describe("sticky viewport production evidence verifier", () => {
 		ansiRows[frameRow] = ansiRows[frameRow]!.replace("selectable", "selectabIe");
 		const mutatedAnsi = ansiRows.join("\n");
 		await Bun.write(ansiPath, mutatedAnsi);
-		await Bun.write(path.join(content, key, "terminal.txt"), Bun.stripANSI(mutatedAnsi));
+		await Bun.write(path.join(content, key, "terminal.txt"), stripVTControlCharacters(mutatedAnsi));
 		await Bun.write(path.join(content, key, "terminal.html"), ansiToHtml(mutatedAnsi));
 		const mutatedFrameSha = new Bun.CryptoHasher("sha256").update(mutatedAnsi).digest("hex");
 		contentMetadata.state.cursor.frame_sha256 = mutatedFrameSha;
 		anchorOf(contentMetadata).frame_sha256 = mutatedFrameSha;
 		anchorOf(contentMetadata).row_text_sha256 = new Bun.CryptoHasher("sha256")
-			.update(Bun.stripANSI(mutatedAnsi).split("\n")[frameRow]!)
+			.update(stripVTControlCharacters(mutatedAnsi).split("\n")[frameRow]!)
 			.digest("hex");
 		for (const name of ["terminal-ansi.txt", "terminal.txt", "terminal.html"] as const)
 			await rehash(content, key, name);
@@ -989,8 +990,8 @@ describe("sticky viewport production evidence verifier", () => {
 			// Unicode entries legitimately differ in SGR form across hosts, but their
 			// semantic payload must not: stripping color has to leave identical bytes.
 			for (const key of keys) {
-				const stripped = Bun.stripANSI(await fs.readFile(path.join(root, key, "terminal.txt"), "utf8"));
-				const reference = Bun.stripANSI(await fs.readFile(path.join(dumb, key, "terminal.txt"), "utf8"));
+				const stripped = stripVTControlCharacters(await fs.readFile(path.join(root, key, "terminal.txt"), "utf8"));
+				const reference = stripVTControlCharacters(await fs.readFile(path.join(dumb, key, "terminal.txt"), "utf8"));
 				expect(stripped).toEqual(reference);
 			}
 		}
@@ -1033,7 +1034,7 @@ describe("sticky viewport production evidence verifier", () => {
 			const forged = `\u001b[31m${value}`;
 			return {
 				ansi: forged,
-				text: Bun.stripANSI(forged),
+				text: stripVTControlCharacters(forged),
 				sha256: new Bun.CryptoHasher("sha256").update(forged).digest("hex"),
 			};
 		};
@@ -1233,7 +1234,7 @@ describe("sticky viewport production evidence verifier", () => {
 		ansiRows[row] = mutate(before);
 		if (ansiRows[row] === before) throw new Error(`row ${row} of ${key} was not mutated`);
 		const mutatedAnsi = ansiRows.join("\n");
-		const mutatedText = Bun.stripANSI(mutatedAnsi);
+		const mutatedText = stripVTControlCharacters(mutatedAnsi);
 		await Bun.write(ansiPath, mutatedAnsi);
 		await Bun.write(path.join(root, key, "terminal.txt"), mutatedText);
 		await Bun.write(path.join(root, key, "terminal.html"), ansiToHtml(mutatedAnsi));

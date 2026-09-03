@@ -1,3 +1,4 @@
+import { stripVTControlCharacters } from "node:util";
 import * as fs from "node:fs/promises";
 import * as path from "node:path";
 import type { GjcLifecycleContext } from "../src/extensibility/gjc-plugins/lifecycle";
@@ -205,8 +206,9 @@ export async function renderGjcBundleSettingsEntry(
 	await settle();
 	const rendered = component.render(viewport.cols).join("\n");
 	component.dispose();
-	const terminalAnsiText = entry.renderMode === "ascii-no-color" ? asciiText(Bun.stripANSI(rendered)) : rendered;
-	const terminalText = Bun.stripANSI(terminalAnsiText);
+	const terminalAnsiText =
+		entry.renderMode === "ascii-no-color" ? asciiText(stripVTControlCharacters(rendered)) : rendered;
+	const terminalText = stripVTControlCharacters(terminalAnsiText);
 	return { terminalText, terminalAnsiText, viewport };
 }
 

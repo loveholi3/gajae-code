@@ -1,3 +1,4 @@
+import { stripVTControlCharacters } from "node:util";
 import { describe, expect, it } from "bun:test";
 import { type Component, renderMetrics, Text, TUI } from "@gajae-code/tui";
 import { Markdown } from "@gajae-code/tui/components/markdown";
@@ -166,8 +167,8 @@ function assertGutterInvariants(): void {
 		const controlLines = control.render(120);
 		const selectedLines = selected.render(120);
 		for (let row = 0; row < fixture.length; row++) {
-			const plainControl = Bun.stripANSI(controlLines[row]);
-			const plainSelected = Bun.stripANSI(selectedLines[row]);
+			const plainControl = stripVTControlCharacters(controlLines[row]);
+			const plainSelected = stripVTControlCharacters(selectedLines[row]);
 			expect(plainControl.slice(GUTTER.length)).toBe(plainSelected.slice(GUTTER.length));
 			expect(Bun.stringWidth(plainControl.slice(0, GUTTER.length))).toBe(GUTTER.length);
 			expect(Bun.stringWidth(plainSelected.slice(0, GUTTER.length))).toBe(GUTTER.length);

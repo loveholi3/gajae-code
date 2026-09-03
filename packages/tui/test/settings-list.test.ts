@@ -1,3 +1,4 @@
+import { stripVTControlCharacters } from "node:util";
 import { afterEach, beforeEach, describe, expect, it } from "bun:test";
 import { SettingsList, type SettingsListTheme } from "../src/components/settings-list";
 import { KeybindingsManager, setKeybindings, TUI_KEYBINDINGS } from "../src/keybindings";
@@ -105,7 +106,7 @@ describe("SettingsList", () => {
 		]);
 		list.handleInput("\n");
 
-		expect(Bun.stripANSI(list.render(80).join("\n"))).toContain("→ Mode");
+		expect(stripVTControlCharacters(list.render(80).join("\n"))).toContain("→ Mode");
 		expect(selections.at(-1)).toBe("mode");
 		expect(changes).toEqual([["mode", "on"]]);
 	});
@@ -146,7 +147,7 @@ describe("SettingsList", () => {
 
 		for (const character of "Memory") list.handleInput(character);
 		list.handleInput(" ");
-		const rendered = Bun.stripANSI(list.render(80).join("\n"));
+		const rendered = stripVTControlCharacters(list.render(80).join("\n"));
 
 		expect(changed).toBe(false);
 		expect(rendered).toContain("Search: Memory ");
@@ -172,7 +173,7 @@ describe("SettingsList", () => {
 
 		// "theme" is index 1 in the unfiltered list but index 0 once filtered.
 		for (const character of "theme") list.handleInput(character);
-		const filtered = Bun.stripANSI(list.render(80).join("\n"));
+		const filtered = stripVTControlCharacters(list.render(80).join("\n"));
 		expect(filtered).toContain("Theme");
 		expect(filtered).not.toContain("Memory Backend");
 		expect(filtered).toContain("Enter to change");
@@ -201,10 +202,10 @@ describe("SettingsList", () => {
 		list.handleInput("e");
 		list.handleInput("x");
 		list.handleInput("\x7f");
-		expect(Bun.stripANSI(list.render(80).join("\n"))).toContain("Search: me");
+		expect(stripVTControlCharacters(list.render(80).join("\n"))).toContain("Search: me");
 
 		list.handleInput("\x1b");
-		const restored = Bun.stripANSI(list.render(80).join("\n"));
+		const restored = stripVTControlCharacters(list.render(80).join("\n"));
 		expect(cancelCount).toBe(0);
 		expect(restored).not.toContain("Search:");
 		expect(restored).toContain("Memory Backend");
@@ -250,7 +251,7 @@ describe("SettingsList", () => {
 		]);
 		list.handleInput("\n");
 
-		expect(Bun.stripANSI(list.render(80).join("\n"))).toContain("→ Only");
+		expect(stripVTControlCharacters(list.render(80).join("\n"))).toContain("→ Only");
 	});
 	it("shrinks labels and clamps values at 48 columns", () => {
 		const list = new SettingsList(
@@ -266,6 +267,6 @@ describe("SettingsList", () => {
 			() => {},
 			() => {},
 		);
-		for (const line of list.render(48)) expect(Bun.stripANSI(line).length).toBeLessThanOrEqual(48);
+		for (const line of list.render(48)) expect(stripVTControlCharacters(line).length).toBeLessThanOrEqual(48);
 	});
 });

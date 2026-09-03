@@ -1,3 +1,4 @@
+import { stripVTControlCharacters } from "node:util";
 import { afterAll, beforeAll, describe, expect, it } from "bun:test";
 import { ThinkingLevel } from "@gajae-code/agent-core";
 import { resetSettingsForTest, Settings } from "../src/config/settings";
@@ -50,7 +51,7 @@ afterAll(() => {
 describe("model segment inline context percentage", () => {
 	it("renders the token percentage right after the model / reasoning effort", () => {
 		const ctx = makeCtx({ contextPercent: 42.5, contextWindow: 200_000 });
-		const rendered = Bun.stripANSI(renderSegment("model", ctx).content);
+		const rendered = stripVTControlCharacters(renderSegment("model", ctx).content);
 
 		// Percentage appears, and after the model name + reasoning effort.
 		expect(rendered).toContain("42.5%");
@@ -59,7 +60,7 @@ describe("model segment inline context percentage", () => {
 
 	it("omits the percentage when contextWindow is unknown", () => {
 		const ctx = makeCtx({ contextPercent: 42.5, contextWindow: 0 });
-		const rendered = Bun.stripANSI(renderSegment("model", ctx).content);
+		const rendered = stripVTControlCharacters(renderSegment("model", ctx).content);
 
 		expect(rendered).not.toContain("%");
 		expect(rendered).toContain("Sonnet");
@@ -67,8 +68,8 @@ describe("model segment inline context percentage", () => {
 
 	it("renders an unknown provider context snapshot as a question mark", () => {
 		const ctx = makeCtx({ contextPercent: null, contextWindow: 200_000 });
-		const model = Bun.stripANSI(renderSegment("model", ctx).content);
-		const contextPct = Bun.stripANSI(renderSegment("context_pct", ctx).content);
+		const model = stripVTControlCharacters(renderSegment("model", ctx).content);
+		const contextPct = stripVTControlCharacters(renderSegment("context_pct", ctx).content);
 
 		expect(model).toContain("?");
 		expect(contextPct).toContain("?/200K");
@@ -80,7 +81,7 @@ describe("model segment inline context percentage", () => {
 			contextWindow: 200_000,
 			options: { model: { showContextPercent: false } },
 		});
-		const rendered = Bun.stripANSI(renderSegment("model", ctx).content);
+		const rendered = stripVTControlCharacters(renderSegment("model", ctx).content);
 
 		expect(rendered).not.toContain("42.5%");
 		expect(rendered).toContain("Sonnet");
@@ -91,7 +92,7 @@ describe("model segment inline context percentage", () => {
 			contextWindow: 200_000,
 			contextPctSegmentActive: true,
 		});
-		const rendered = Bun.stripANSI(renderSegment("model", ctx).content);
+		const rendered = stripVTControlCharacters(renderSegment("model", ctx).content);
 
 		// Avoids showing the same percentage twice in custom layouts that keep
 		// both the model segment and a standalone context_pct segment.
@@ -111,7 +112,7 @@ describe("model segment inline context percentage", () => {
 				isFastModeActive: () => false,
 			} as unknown as SegmentContext["session"],
 		});
-		const rendered = Bun.stripANSI(renderSegment("model", ctx).content);
+		const rendered = stripVTControlCharacters(renderSegment("model", ctx).content);
 
 		expect(rendered).toContain("7.3%");
 		expect(rendered).toMatch(/Sonnet.*7\.3%/);

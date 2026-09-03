@@ -1,3 +1,4 @@
+import { stripVTControlCharacters } from "node:util";
 import { afterEach, beforeEach, describe, expect, it, vi } from "bun:test";
 import * as fs from "node:fs/promises";
 import * as os from "node:os";
@@ -118,7 +119,7 @@ describe("web search CLI settings", () => {
 		await runSearchCommand({ query: "configured provider", expanded: false });
 
 		expect(fetchSpy).toHaveBeenCalled();
-		expect(Bun.stripANSI(output)).toContain("Provider: xAI");
+		expect(stripVTControlCharacters(output)).toContain("Provider: xAI");
 	});
 
 	it("honors legacy web_search.provider when providers.webSearch is unset", async () => {
@@ -146,7 +147,7 @@ describe("web search CLI settings", () => {
 
 		await runSearchCommand({ query: "https://www.reddit.com/r/test", expanded: false });
 
-		expect(Bun.stripANSI(output)).toContain("Provider: Insane");
-		expect(Bun.stripANSI(output)).toContain("Alias Provider");
+		expect(stripVTControlCharacters(output)).toContain("Provider: Insane");
+		expect(stripVTControlCharacters(output)).toContain("Alias Provider");
 	});
 });

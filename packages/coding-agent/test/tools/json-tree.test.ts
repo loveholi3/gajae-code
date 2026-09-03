@@ -1,3 +1,4 @@
+import { stripVTControlCharacters } from "node:util";
 import { describe, expect, it } from "bun:test";
 import { renderJsonTreeLines } from "../../src/tools/json-tree";
 
@@ -20,7 +21,7 @@ describe("renderJsonTreeLines", () => {
 	}
 
 	function stripLines(lines: string[]): string[] {
-		return lines.map(line => Bun.stripANSI(line));
+		return lines.map(line => stripVTControlCharacters(line));
 	}
 
 	it("wraps long path-like string values as deterministic continuations", async () => {

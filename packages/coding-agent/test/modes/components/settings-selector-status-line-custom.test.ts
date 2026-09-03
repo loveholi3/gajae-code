@@ -1,3 +1,4 @@
+import { stripVTControlCharacters } from "node:util";
 import { beforeAll, beforeEach, describe, expect, it, vi } from "bun:test";
 import * as fs from "node:fs/promises";
 import * as os from "node:os";
@@ -71,7 +72,7 @@ describe("SettingsSelectorComponent status line custom editor", () => {
 		const { component } = createSelector();
 		selectCustomEditor(component);
 
-		expect(Bun.stripANSI(component.render(120).join("\n"))).toContain("Status Line Custom Editor");
+		expect(stripVTControlCharacters(component.render(120).join("\n"))).toContain("Status Line Custom Editor");
 	});
 	it("keeps Custom out of the generic preset selector", () => {
 		const { component } = createSelector();
@@ -80,7 +81,7 @@ describe("SettingsSelectorComponent status line custom editor", () => {
 
 		component.handleInput("\n");
 
-		const presetMenu = Bun.stripANSI(component.render(120).join("\n"));
+		const presetMenu = stripVTControlCharacters(component.render(120).join("\n"));
 		expect(presetMenu).toContain("Status Line Preset");
 		expect(presetMenu).not.toContain("Custom");
 	});
@@ -90,12 +91,12 @@ describe("SettingsSelectorComponent status line custom editor", () => {
 		const { component, changedSettings, previews } = createSelector();
 
 		for (let i = 0; i < 40; i++) {
-			const rendered = Bun.stripANSI(component.render(120).join("\n"));
+			const rendered = stripVTControlCharacters(component.render(120).join("\n"));
 			if (rendered.includes("❯ Status Line Usage Mode")) break;
 			component.handleInput("\x1b[B");
 		}
 
-		expect(Bun.stripANSI(component.render(120).join("\n"))).toContain("❯ Status Line Usage Mode");
+		expect(stripVTControlCharacters(component.render(120).join("\n"))).toContain("❯ Status Line Usage Mode");
 		component.handleInput("\n");
 
 		expect(settings.get("statusLine.segmentOptions")).toMatchObject({ usage: { mode: "remaining" } });
@@ -112,12 +113,12 @@ describe("SettingsSelectorComponent status line custom editor", () => {
 		const { component } = createSelector();
 
 		for (let i = 0; i < 40; i++) {
-			const rendered = Bun.stripANSI(component.render(120).join("\n"));
+			const rendered = stripVTControlCharacters(component.render(120).join("\n"));
 			if (rendered.includes("❯ Status Line Usage Mode")) break;
 			component.handleInput("\x1b[B");
 		}
 
-		expect(Bun.stripANSI(component.render(120).join("\n"))).toContain("❯ Status Line Usage Mode");
+		expect(stripVTControlCharacters(component.render(120).join("\n"))).toContain("❯ Status Line Usage Mode");
 	});
 	it("seeds custom layout from the active preset, previews segment options, and saves to settings", () => {
 		settings.set("statusLine.preset", "minimal");
@@ -128,7 +129,7 @@ describe("SettingsSelectorComponent status line custom editor", () => {
 
 		openCustomEditor(component);
 
-		const opened = Bun.stripANSI(component.render(120).join("\n"));
+		const opened = stripVTControlCharacters(component.render(120).join("\n"));
 		expect(opened).toContain("Status Line Custom Editor");
 		expect(opened).not.toContain("Current width preview");
 		expect(opened).not.toContain("Narrow width preview");
@@ -164,17 +165,17 @@ describe("SettingsSelectorComponent status line custom editor", () => {
 			getStatusLinePreview: () => renderedPreview,
 		});
 
-		expect(Bun.stripANSI(component.render(120).join("\n"))).toContain("initial-preview");
+		expect(stripVTControlCharacters(component.render(120).join("\n"))).toContain("initial-preview");
 
 		openCustomEditor(component);
-		expect(Bun.stripANSI(component.render(120).join("\n"))).toContain("preset:custom");
+		expect(stripVTControlCharacters(component.render(120).join("\n"))).toContain("preset:custom");
 
 		for (let i = 0; i < 3; i++) component.handleInput("\x1b[B"); // Segment: gajae.
 		component.handleInput("\n"); // hidden -> left.
-		expect(Bun.stripANSI(component.render(120).join("\n"))).toContain("left:path,git,gajae");
+		expect(stripVTControlCharacters(component.render(120).join("\n"))).toContain("left:path,git,gajae");
 
 		component.handleInput("\x1b"); // Cancel restores the parent preview too.
-		const restored = Bun.stripANSI(component.render(120).join("\n"));
+		const restored = stripVTControlCharacters(component.render(120).join("\n"));
 		expect(restored).toContain("preset:minimal");
 		expect(restored).not.toContain("left:path,git,gajae");
 	});
@@ -186,11 +187,11 @@ describe("SettingsSelectorComponent status line custom editor", () => {
 
 		for (let i = 0; i < 5; i++) component.handleInput("\x1b[B"); // Segment: mode.
 		const segmentLines = component.render(120).length;
-		expect(Bun.stripANSI(component.render(120).join("\n"))).toContain("❯ Segment: mode");
+		expect(stripVTControlCharacters(component.render(120).join("\n"))).toContain("❯ Segment: mode");
 
 		component.handleInput("\x1b[B"); // Move left: mode.
 		const moveLines = component.render(120).length;
-		expect(Bun.stripANSI(component.render(120).join("\n"))).toContain("❯ Move left: mode");
+		expect(stripVTControlCharacters(component.render(120).join("\n"))).toContain("❯ Move left: mode");
 		expect(moveLines).toBe(segmentLines);
 	});
 	it("clones preset segment option defaults when saving from a preset", () => {
@@ -234,14 +235,14 @@ describe("SettingsSelectorComponent status line custom editor", () => {
 		openCustomEditor(component);
 
 		for (let i = 0; i < 80; i++) {
-			const rendered = Bun.stripANSI(component.render(120).join("\n"));
+			const rendered = stripVTControlCharacters(component.render(120).join("\n"));
 			if (rendered.includes("❯ Segment: usage")) break;
 			component.handleInput("\x1b[B");
 		}
 
-		expect(Bun.stripANSI(component.render(120).join("\n"))).toContain("❯ Segment: usage");
+		expect(stripVTControlCharacters(component.render(120).join("\n"))).toContain("❯ Segment: usage");
 		component.handleInput("\x1b[B");
-		expect(Bun.stripANSI(component.render(120).join("\n"))).toContain("❯ Usage: mode");
+		expect(stripVTControlCharacters(component.render(120).join("\n"))).toContain("❯ Usage: mode");
 	});
 
 	it("edits segment placement and typed options before saving", () => {
@@ -254,7 +255,7 @@ describe("SettingsSelectorComponent status line custom editor", () => {
 		component.handleInput("\n"); // Segment: gajae hidden -> left.
 
 		component.handleInput("\x1b[A"); // Move back to the separator row; selection was preserved after refresh.
-		expect(Bun.stripANSI(component.render(120).join("\n"))).toContain("Separator");
+		expect(stripVTControlCharacters(component.render(120).join("\n"))).toContain("Separator");
 
 		component.handleInput("\x1b[A");
 		component.handleInput("\x1b[A");

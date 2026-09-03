@@ -1,3 +1,4 @@
+import { stripVTControlCharacters } from "node:util";
 import { afterEach, beforeEach, describe, expect, it, vi } from "bun:test";
 import { getDefault } from "../src/config/settings-schema";
 import { ReadToolGroupComponent, readArgsTargetInternalUrl } from "../src/modes/components/read-tool-group";
@@ -28,7 +29,7 @@ describe("ReadToolGroupComponent", () => {
 			"read-0",
 		);
 
-		const rendered = Bun.stripANSI(component.render(120).join("\n"));
+		const rendered = stripVTControlCharacters(component.render(120).join("\n"));
 
 		expect(rendered).toContain("Read /tmp/example.ts");
 		expect(rendered).not.toContain("line 1");
@@ -109,7 +110,7 @@ describe("ReadToolGroupComponent", () => {
 			"read-1",
 		);
 
-		const rendered = Bun.stripANSI(component.render(120).join("\n"));
+		const rendered = stripVTControlCharacters(component.render(120).join("\n"));
 
 		expect(rendered).toContain(themeModule.theme.status.warning);
 		expect(rendered).not.toContain(themeModule.theme.status.success);
@@ -133,7 +134,7 @@ describe("ReadToolGroupComponent", () => {
 			"read-2",
 		);
 
-		const rendered = Bun.stripANSI(component.render(120).join("\n"));
+		const rendered = stripVTControlCharacters(component.render(120).join("\n"));
 		const highlightedInput = highlightSpy.mock.calls[0]?.[0];
 
 		expect(highlightedInput).toBe("line 1\nline 2\nline 3");
@@ -153,7 +154,7 @@ describe("ReadToolGroupComponent", () => {
 			"read-3",
 		);
 
-		const rendered = Bun.stripANSI(component.render(120).join("\n"));
+		const rendered = stripVTControlCharacters(component.render(120).join("\n"));
 		const matches = rendered.match(/Read \/tmp\/example\.ts:L10-L20/g) ?? [];
 
 		expect(matches).toHaveLength(1);
@@ -173,11 +174,11 @@ describe("ReadToolGroupComponent", () => {
 		component.updateArgs({ path: "/tmp/three.ts" }, "read-3");
 		component.updateResult({ content: [{ type: "text", text: "error" }], isError: true }, false, "read-3");
 
-		expect(Bun.stripANSI(component.render(120).join("\n"))).toContain("four");
+		expect(stripVTControlCharacters(component.render(120).join("\n"))).toContain("four");
 
 		component.setManuallyExpanded(false);
 		component.setExpanded(true);
-		expect(Bun.stripANSI(component.render(120).join("\n"))).not.toContain("four");
+		expect(stripVTControlCharacters(component.render(120).join("\n"))).not.toContain("four");
 	});
 
 	it("lets unpinned read groups follow automatic expansion", () => {
@@ -186,7 +187,7 @@ describe("ReadToolGroupComponent", () => {
 		component.updateResult({ content: [{ type: "text", text: "one\ntwo\nthree\nfour" }] }, false, "read-1");
 		component.setExpanded(true);
 
-		expect(Bun.stripANSI(component.render(120).join("\n"))).toContain("four");
+		expect(stripVTControlCharacters(component.render(120).join("\n"))).toContain("four");
 	});
 	it("accepts a controller override as a fresh explicit pin", () => {
 		const manuallyExpandable = { setExpanded: vi.fn(), setManuallyExpanded: vi.fn() };

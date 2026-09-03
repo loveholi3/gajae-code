@@ -1,3 +1,4 @@
+import { stripVTControlCharacters } from "node:util";
 import { afterEach, beforeEach, describe, expect, it, vi } from "bun:test";
 import * as fs from "node:fs/promises";
 import * as os from "node:os";
@@ -37,7 +38,7 @@ describe("config CLI schema coverage", () => {
 		await runConfigCommand({ action: "list", flags: {} });
 
 		const lines = logSpy.mock.calls.map(call => String(call[0] ?? ""));
-		const plainLines = lines.map(line => Bun.stripANSI(line));
+		const plainLines = lines.map(line => stripVTControlCharacters(line));
 		const modelRolesLine = plainLines.find(line => line.includes("modelRoles ="));
 		expect(modelRolesLine).toBeDefined();
 		const plainModelRolesLine = String(modelRolesLine);
@@ -262,10 +263,10 @@ describe("config CLI schema coverage", () => {
 			});
 			await runConfigCommand({ action: "set", key: "notifications.enabled", value: "true", flags: { json: true } });
 			await runConfigCommand({ action: "get", key: "notifications.enabled", flags: {} });
-			const enabledGet = Bun.stripANSI(String(logSpy.mock.calls.at(-1)?.[0]));
+			const enabledGet = stripVTControlCharacters(String(logSpy.mock.calls.at(-1)?.[0]));
 			await runConfigCommand({ action: "list", flags: {} });
 
-			const listOutput = logSpy.mock.calls.map(call => Bun.stripANSI(String(call[0] ?? ""))).join("\n");
+			const listOutput = logSpy.mock.calls.map(call => stripVTControlCharacters(String(call[0] ?? ""))).join("\n");
 
 			expect(enabledGet).toBe("true");
 			expect(listOutput).toContain("notifications.enabled = true");
@@ -385,13 +386,13 @@ describe("config CLI durable persistence", () => {
 		}
 
 		expect(exitSpy).toHaveBeenCalledWith(1);
-		const errors = errorSpy.mock.calls.map(call => Bun.stripANSI(String(call[0] ?? "")));
+		const errors = errorSpy.mock.calls.map(call => stripVTControlCharacters(String(call[0] ?? "")));
 		expect(errors.some(line => line.includes("Failed to persist setting"))).toBe(true);
 		const diagnostic = errors.join("\n");
 		expect(diagnostic).toMatch(/EACCES|atomic replacement failed|atomic_unavailable/);
 		expect(diagnostic).not.toContain(testAgentDir);
 		expect(diagnostic).not.toContain("true");
-		const logs = logSpy.mock.calls.map(call => Bun.stripANSI(String(call[0] ?? "")));
+		const logs = logSpy.mock.calls.map(call => stripVTControlCharacters(String(call[0] ?? "")));
 		expect(logs.some(line => line.includes('"value": true') || line.includes('"value":true'))).toBe(false);
 	});
 
@@ -483,7 +484,7 @@ describe("config CLI durable persistence", () => {
 		expect(exitSpy).toHaveBeenCalledWith(1);
 		expect(await fs.readFile(realTarget, "utf8")).toBe(initialConfig);
 		expect(await fs.readFile(otherTarget, "utf8")).toBe(initialConfig);
-		const diagnostic = errorSpy.mock.calls.map(call => Bun.stripANSI(String(call[0] ?? ""))).join("\n");
+		const diagnostic = errorSpy.mock.calls.map(call => stripVTControlCharacters(String(call[0] ?? ""))).join("\n");
 		expect(diagnostic).toContain("config target changed during save");
 		expect(diagnostic).not.toContain(testAgentDir);
 	});

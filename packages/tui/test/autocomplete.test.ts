@@ -1,3 +1,4 @@
+import { stripVTControlCharacters } from "node:util";
 import { afterEach, beforeEach, describe, expect, it } from "bun:test";
 import * as fs from "node:fs";
 import * as os from "node:os";
@@ -459,7 +460,7 @@ async function renderEditorAutocomplete(
 	return editor
 		.render(width)
 		.slice(1)
-		.map(line => Bun.stripANSI(line));
+		.map(line => stripVTControlCharacters(line));
 }
 
 async function renderEditorAbsolutePathAutocomplete(
@@ -476,7 +477,7 @@ async function renderEditorAbsolutePathAutocomplete(
 	return editor
 		.render(width)
 		.slice(1)
-		.map(line => Bun.stripANSI(line));
+		.map(line => stripVTControlCharacters(line));
 }
 
 describe("Editor autocomplete layout", () => {

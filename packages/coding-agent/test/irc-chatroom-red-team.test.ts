@@ -1,3 +1,4 @@
+import { stripVTControlCharacters } from "node:util";
 import { afterAll, beforeAll, describe, expect, it } from "bun:test";
 import * as fs from "node:fs/promises";
 import * as os from "node:os";
@@ -87,7 +88,7 @@ function makeHelpers(): { helpers: UiHelpers; chat: Container } {
 }
 
 function transcript(chat: Container): string {
-	return Bun.stripANSI(chat.render(100).join("\n"));
+	return stripVTControlCharacters(chat.render(100).join("\n"));
 }
 
 beforeAll(() => initTheme());
@@ -179,7 +180,7 @@ describe("G001 IRC chat-room adversarial QA", () => {
 
 		const layout = computeIrcSplitWidths(100);
 		for (const row of rendered) {
-			const plain = Bun.stripANSI(row);
+			const plain = stripVTControlCharacters(row);
 			expect(visibleWidth(plain.slice(0, layout.leftWidth))).toBeLessThanOrEqual(layout.leftWidth);
 			expect(plain.slice(layout.leftWidth, layout.leftWidth + layout.separatorWidth)).toBe(" | ");
 		}
@@ -227,7 +228,7 @@ describe("G001 IRC chat-room adversarial QA", () => {
 		ledger.observe(observation, false);
 		const split = new IrcSplitViewComponent(new Lines(["left"]), ledger, plainTheme);
 		split.setVisible(true);
-		const sidebarRows = split.render(200).map(row => Bun.stripANSI(row));
+		const sidebarRows = split.render(200).map(row => stripVTControlCharacters(row));
 		const sidebar = sidebarRows.join("\n");
 		expect(sidebar).toContain(`${block.sender} → ${block.recipient} · ${block.time}`);
 		for (const row of sidebarRows) {

@@ -1,3 +1,4 @@
+import { stripVTControlCharacters } from "node:util";
 import * as fs from "node:fs/promises";
 import * as os from "node:os";
 import * as path from "node:path";
@@ -139,7 +140,9 @@ export class CommandController {
 	async handleDebugTranscriptCommand(): Promise<void> {
 		try {
 			const width = Math.max(1, this.ctx.ui.terminal.columns);
-			const renderedLines = this.ctx.chatContainer.render(width).map(line => replaceTabs(Bun.stripANSI(line)));
+			const renderedLines = this.ctx.chatContainer
+				.render(width)
+				.map(line => replaceTabs(stripVTControlCharacters(line)));
 			const rendered = renderedLines.join("\n").trimEnd();
 			if (!rendered) {
 				this.ctx.showError("No messages to dump yet.");

@@ -1,3 +1,4 @@
+import { stripVTControlCharacters } from "node:util";
 import { beforeAll, beforeEach, describe, expect, it } from "bun:test";
 import type { Theme } from "../../src/modes/theme/theme";
 import { getThemeByName, setThemeInstance } from "../../src/modes/theme/theme";
@@ -68,7 +69,7 @@ function render(details: SubagentToolDetails, expanded = true): string {
 		{ expanded, isPartial: true, spinnerFrame: 0 },
 		theme,
 	);
-	return Bun.stripANSI(component.render(160).join("\n"));
+	return stripVTControlCharacters(component.render(160).join("\n"));
 }
 
 describe("subagentToolRenderer", () => {
@@ -499,7 +500,7 @@ describe("subagent await renderer body cache (PR2)", () => {
 		const lines = renderWith(nestedRetry("anthropic\tproduction", `provider\terror ${"x".repeat(160)}`), {
 			width: 40,
 		});
-		expect(lines.every(line => Bun.stringWidth(Bun.stripANSI(line)) <= 40)).toBe(true);
+		expect(lines.every(line => Bun.stringWidth(stripVTControlCharacters(line)) <= 40)).toBe(true);
 		expect(lines.join("\n")).not.toContain("\t");
 	});
 

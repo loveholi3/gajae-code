@@ -1,3 +1,4 @@
+import { stripVTControlCharacters } from "node:util";
 import { afterEach, beforeAll, describe, expect, it, vi } from "bun:test";
 
 import { IrcSplitViewComponent } from "@gajae-code/coding-agent/modes/components/irc-sidebar";
@@ -101,13 +102,13 @@ describe("bounded IRC inline projection", () => {
 		});
 		const live = chatContainer.render(80);
 		expect(live.length).toBeLessThanOrEqual(2_050);
-		expect(Bun.stripANSI(live.join("\n"))).toContain("… message elided …");
+		expect(stripVTControlCharacters(live.join("\n"))).toContain("… message elided …");
 
 		chatContainer.clear();
 		helpers.addRebuiltIrcObservationToChat(message);
 		const rebuilt = chatContainer.render(80);
 		expect(rebuilt.length).toBeLessThanOrEqual(2_050);
-		expect(Bun.stripANSI(rebuilt.join("\n"))).toContain("… message elided …");
+		expect(stripVTControlCharacters(rebuilt.join("\n"))).toContain("… message elided …");
 	});
 });
 
@@ -127,7 +128,7 @@ const eligibleArrival = {
 };
 
 function transcriptIncludesHint(chatContainer: Container): boolean {
-	return Bun.stripANSI(chatContainer.render(100).join("\n")).includes("opens sidebar");
+	return stripVTControlCharacters(chatContainer.render(100).join("\n")).includes("opens sidebar");
 }
 
 describe("IRC lifecycle resets", () => {
@@ -168,7 +169,7 @@ describe("IRC lifecycle resets", () => {
 
 		await new CommandController(fixture.ctx).handleForkCommand();
 		expect(fixture.ledger.getSidebarRecords()).toEqual([]);
-		expect(Bun.stripANSI(fixture.chatContainer.render(100).join("\n"))).not.toContain("before fork");
+		expect(stripVTControlCharacters(fixture.chatContainer.render(100).join("\n"))).not.toContain("before fork");
 		expect(fixture.helpers.getRenderedIrcInlineComponents()).toEqual(new Map());
 		expect(fixture.isSidebarRequestedVisible()).toBe(false);
 		const postForkChildCount = fixture.chatContainer.children.length;
@@ -176,7 +177,7 @@ describe("IRC lifecycle resets", () => {
 		await fixture.controller.handleEvent({ type: "irc_message", message });
 		expect(fixture.ledger.getSidebarRecords()).toEqual([]);
 		expect(fixture.chatContainer.children).toHaveLength(postForkChildCount);
-		expect(Bun.stripANSI(fixture.chatContainer.render(100).join("\n"))).not.toContain("before fork");
+		expect(stripVTControlCharacters(fixture.chatContainer.render(100).join("\n"))).not.toContain("before fork");
 
 		await fixture.controller.handleEvent({
 			type: "irc_message",

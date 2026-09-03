@@ -1,3 +1,4 @@
+import { stripVTControlCharacters } from "node:util";
 import { afterAll, beforeEach, describe, expect, it, vi } from "bun:test";
 import type { AssistantMessage } from "@gajae-code/ai";
 import { Container, Spacer, Text } from "@gajae-code/tui";
@@ -38,7 +39,7 @@ function message(content: AssistantMessage["content"], stopReason?: AssistantMes
 }
 
 function render(component: AssistantMessageComponent): string {
-	return Bun.stripANSI(component.render(100).join("\n"));
+	return stripVTControlCharacters(component.render(100).join("\n"));
 }
 
 function contentChildren(component: AssistantMessageComponent) {
@@ -155,7 +156,7 @@ describe("AssistantMessageComponent streaming markdown", () => {
 		const finalIds = new Set(finalRender.anchors.flatMap(anchor => (anchor === null ? [] : [anchor.id])));
 		expect(streamingIds.size).toBe(1);
 		expect(finalIds).toEqual(streamingIds);
-		const targetRow = finalRender.lines.findIndex(line => Bun.stripANSI(line).includes("끝"));
+		const targetRow = finalRender.lines.findIndex(line => stripVTControlCharacters(line).includes("끝"));
 		expect(targetRow).toBeGreaterThanOrEqual(0);
 		expect(finalRender.anchors[targetRow]).not.toBeNull();
 	});

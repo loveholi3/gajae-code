@@ -1,3 +1,4 @@
+import { stripVTControlCharacters } from "node:util";
 /**
  * Issue #4291 acceptance 8 + dashboard integration: keyboard navigation,
  * back/cancel behavior, narrow-terminal rendering, scope-bound lists, and the
@@ -115,7 +116,7 @@ describe("CustomizationDashboard", () => {
 		dashboard.handleInput("\x1b[C"); // hooks section
 		const lines = dashboard.render(80);
 		expect(lines.join("\n")).not.toContain("evil\x1b[31m");
-		expect(Bun.stripANSI(lines.join("\n"))).toContain("evil");
+		expect(stripVTControlCharacters(lines.join("\n"))).toContain("evil");
 	});
 
 	test("esc/q closes via onClose", async () => {
@@ -132,7 +133,7 @@ describe("CustomizationDashboard", () => {
 		await seedProjectSkill();
 		const dashboard = await CustomizationDashboard.create(projectDir, undefined, homeDir);
 		const narrow = dashboard.render(20);
-		expect(Bun.stripANSI(narrow.join(" "))).toContain("/extensions:");
+		expect(stripVTControlCharacters(narrow.join(" "))).toContain("/extensions:");
 		for (const line of narrow) {
 			expect(Bun.stringWidth(line)).toBeLessThanOrEqual(20);
 		}

@@ -1,3 +1,4 @@
+import { stripVTControlCharacters } from "node:util";
 import { sanitizeText as currentSanitizeText } from "@gajae-code/utils/sanitize-text";
 
 const STRIP_RE = new RegExp(
@@ -277,7 +278,7 @@ function sanitizeBinaryOutput(str: string): string {
 	return out.join("");
 }
 function jsSanitizeText(text: string): string {
-	return sanitizeBinaryOutput(Bun.stripANSI(text)).replaceAll("\r", "");
+	return sanitizeBinaryOutput(stripVTControlCharacters(text)).replaceAll("\r", "");
 }
 
 const ITERATIONS = 2000;

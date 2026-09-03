@@ -1,3 +1,4 @@
+import { stripVTControlCharacters } from "node:util";
 import * as fs from "node:fs/promises";
 import * as path from "node:path";
 import {
@@ -650,7 +651,7 @@ const verifySemanticAnchor = (
 		fail(`semantic anchor guard: ${key} row content digest does not match the painted anchor row`);
 	if (anchor.frame_sha256 !== ansiSha256)
 		fail(`semantic anchor guard: ${key} frame digest does not match the committed frame`);
-	const frameTextSha256 = hash(Bun.stripANSI(text));
+	const frameTextSha256 = hash(stripVTControlCharacters(text));
 	if (anchor.frame_text_sha256 !== frameTextSha256)
 		fail(`semantic anchor guard: ${key} frame text digest does not match the committed paint`);
 	if (semanticAnchorNamespace(id as string) !== namespace)
@@ -694,7 +695,7 @@ const verifySemanticAnchor = (
 // the artifact digest and legitimately diverges between an indexed-color and a
 // truecolor host; the stripped paint does not, so it is the only frame-wide
 // surface that a single committed value can pin on both hosts.
-export const stickyViewportFrameTextDigest = (frame: string): string => hash(Bun.stripANSI(frame));
+export const stickyViewportFrameTextDigest = (frame: string): string => hash(stripVTControlCharacters(frame));
 const verifyFrameTextWitness = (key: string, text: string) => {
 	// Fail closed: an unwitnessed key is an unpinned frame, not a pass.
 	const expected: string | undefined = STICKY_VIEWPORT_FRAME_TEXT_WITNESS[key as StickyViewportShowcaseKey];
@@ -780,7 +781,7 @@ export async function verifyStickyViewportShowcase(rootInput: string, requireInd
 		const text = await fs.readFile(path.join(root, key, "terminal.txt"), "utf8");
 		const ansi = await fs.readFile(path.join(root, key, "terminal-ansi.txt"), "utf8");
 		const html = await fs.readFile(path.join(root, key, "terminal.html"), "utf8");
-		if (Bun.stripANSI(ansi) !== text) fail(`entry ${key} text/ANSI semantic evidence mismatch`);
+		if (stripVTControlCharacters(ansi) !== text) fail(`entry ${key} text/ANSI semantic evidence mismatch`);
 		if (html !== ansiToHtml(ansi)) fail(`entry ${key} HTML artifact is not canonical ANSI conversion`);
 		const ansiStyleRuns = ansiRuns(ansi);
 		const htmlStyleRuns = htmlRuns(html);
@@ -930,7 +931,7 @@ export async function verifyStickyViewportShowcase(rootInput: string, requireInd
 					probe.todo_rows !== (split ? 1 : 0) ||
 					probe.todo_expanded !== (probe.columns as number) >= 80 ||
 					typeof frame.ansi !== "string" ||
-					frame.text !== Bun.stripANSI(frame.ansi) ||
+					frame.text !== stripVTControlCharacters(frame.ansi) ||
 					frame.sha256 !== hash(frame.ansi) ||
 					// Required ASCII metadata frames must be escape-free too, or the bundle
 					// digest stays host-dependent even when the top-level payload is canonical.
@@ -948,7 +949,7 @@ export async function verifyStickyViewportShowcase(rootInput: string, requireInd
 				);
 			}) ||
 			typeof visibleEmpty.ansi !== "string" ||
-			visibleEmpty.text !== Bun.stripANSI(visibleEmpty.ansi) ||
+			visibleEmpty.text !== stripVTControlCharacters(visibleEmpty.ansi) ||
 			visibleEmpty.sha256 !== hash(visibleEmpty.ansi) ||
 			(mode === "ascii-no-color" && /\x1b\[/.test(visibleEmpty.ansi as string)) ||
 			JSON.stringify(rootOrder) !==

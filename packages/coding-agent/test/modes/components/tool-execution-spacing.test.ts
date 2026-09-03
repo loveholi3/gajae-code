@@ -1,3 +1,4 @@
+import { stripVTControlCharacters } from "node:util";
 import { afterEach, beforeAll, describe, expect, it } from "bun:test";
 import { resetSettingsForTest, Settings } from "@gajae-code/coding-agent/config/settings";
 import { type IrcSidebarTheme, IrcSplitViewComponent } from "@gajae-code/coding-agent/modes/components/irc-sidebar";
@@ -36,7 +37,7 @@ afterEach(() => {
 function renderTool(command: string): string[] {
 	const component = new ToolExecutionComponent("bash", { command }, {}, undefined, uiStub);
 	component.updateResult({ content: [{ type: "text", text: `output of ${command}` }], isError: false }, false);
-	return component.render(80).map(line => Bun.stripANSI(line));
+	return component.render(80).map(line => stripVTControlCharacters(line));
 }
 
 function countEdgeBlanks(lines: string[]): { leading: number; trailing: number } {
@@ -71,18 +72,18 @@ it("preserves manual expansion through automatic updates and drops it on remount
 	component.setManuallyExpanded(true);
 	component.setExpanded(false);
 
-	expect(Bun.stripANSI(component.render(80).join("\n"))).toContain("Args");
+	expect(stripVTControlCharacters(component.render(80).join("\n"))).toContain("Args");
 
 	const remounted = new ToolExecutionComponent("custom", { path: "/tmp/example.ts" }, {}, undefined, uiStub);
 	remounted.setExpanded(false);
-	expect(Bun.stripANSI(remounted.render(80).join("\n"))).not.toContain("Args");
+	expect(stripVTControlCharacters(remounted.render(80).join("\n"))).not.toContain("Args");
 });
 
 it("lets untouched components follow automatic expansion", () => {
 	const component = new ToolExecutionComponent("custom", { path: "/tmp/example.ts" }, {}, undefined, uiStub);
 	component.setExpanded(true);
 
-	expect(Bun.stripANSI(component.render(80).join("\n"))).toContain("Args");
+	expect(stripVTControlCharacters(component.render(80).join("\n"))).toContain("Args");
 });
 
 it("replaces generic SIXEL output while the IRC sidebar is visible and restores passthrough when hidden", () => {
@@ -98,7 +99,9 @@ it("replaces generic SIXEL output while the IRC sidebar is visible and restores 
 	split.setVisible(true);
 	const visible = split.render(120).join("\n");
 	expect(visible).not.toContain("\x1bP");
-	expect(Bun.stripANSI(visible).split("[SIXEL image hidden while IRC sidebar is visible]").length - 1).toBe(1);
+	expect(stripVTControlCharacters(visible).split("[SIXEL image hidden while IRC sidebar is visible]").length - 1).toBe(
+		1,
+	);
 	split.setVisible(false);
 	expect(split.render(120).join("\n")).toContain(sixel);
 });
