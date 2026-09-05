@@ -1,3 +1,4 @@
+import { stripVTControlCharacters } from "node:util";
 import chalk from "chalk";
 import type { CasReceipt } from "../../../src/config/atomic-yaml-patch";
 import { Settings } from "../../../src/config/settings";
@@ -738,7 +739,7 @@ async function waitForEditorSurface(
 	label: string,
 ): Promise<void> {
 	for (let attempt = 0; attempt < 50; attempt += 1) {
-		const plain = Bun.stripANSI(component.render(160).join("\n"));
+		const plain = stripVTControlCharacters(component.render(160).join("\n"));
 		if (predicate(plain)) return;
 		await Promise.resolve();
 		await Bun.sleep(0);
@@ -1225,9 +1226,9 @@ export async function renderNotificationsSettingsShowcase(
 		await settleEditor();
 		const navigation = await navigateToState(component, entry.stateId);
 		const rendered = renderTerminalSurface(component, entry.viewport, entry.stateId);
-		const terminalAnsiText = entry.renderMode === "ascii-no-color" ? Bun.stripANSI(rendered) : rendered;
+		const terminalAnsiText = entry.renderMode === "ascii-no-color" ? stripVTControlCharacters(rendered) : rendered;
 		return {
-			terminalText: Bun.stripANSI(terminalAnsiText),
+			terminalText: stripVTControlCharacters(terminalAnsiText),
 			terminalAnsiText,
 			captureMode: "live-settings-selector",
 			state: operations.snapshot,

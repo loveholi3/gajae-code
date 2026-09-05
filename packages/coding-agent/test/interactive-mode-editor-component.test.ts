@@ -379,7 +379,9 @@ describe("InteractiveMode.setEditorComponent", () => {
 			},
 			arrival,
 		);
-		const rendered = components.flatMap(component => component.render(120)).map(line => Bun.stripANSI(line));
+		const rendered = components
+			.flatMap(component => component.render(120))
+			.map(line => stripVTControlCharacters(line));
 		expect(rendered.join("\n")).not.toContain("opens sidebar");
 	});
 
@@ -486,7 +488,9 @@ describe("InteractiveMode.setEditorComponent", () => {
 			},
 			arrival,
 		);
-		const rendered = components.flatMap(component => component.render(120)).map(line => Bun.stripANSI(line));
+		const rendered = components
+			.flatMap(component => component.render(120))
+			.map(line => stripVTControlCharacters(line));
 		expect(rendered.join("\n")).not.toContain("opens sidebar");
 	});
 
@@ -497,7 +501,7 @@ describe("InteractiveMode.setEditorComponent", () => {
 		mode.showStatus("ephemeral status row");
 
 		const rendered = mode.chatContainer.renderWithViewportAnchors(48);
-		const plainLines = rendered.lines.map(line => Bun.stripANSI(line));
+		const plainLines = rendered.lines.map(line => stripVTControlCharacters(line));
 		const durableRow = plainLines.findIndex(line => line.includes("durable semantic user"));
 		const syntheticRow = plainLines.findIndex(line => line.includes("synthetic replay row"));
 		const statusRow = plainLines.findIndex(line => line.includes("ephemeral status row"));

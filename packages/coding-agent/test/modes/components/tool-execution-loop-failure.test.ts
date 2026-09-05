@@ -1,3 +1,4 @@
+import { stripVTControlCharacters } from "node:util";
 import { beforeAll, describe, expect, it } from "bun:test";
 import { resetSettingsForTest, Settings } from "@gajae-code/coding-agent/config/settings";
 import { ToolExecutionComponent } from "@gajae-code/coding-agent/modes/components/tool-execution";
@@ -26,15 +27,15 @@ function renderLoopFailure(toolName: string, args: Record<string, unknown>): str
 		},
 		false,
 	);
-	return Bun.stripANSI(component.render(80).join("\n"));
+	return stripVTControlCharacters(component.render(80).join("\n"));
 }
 
 describe("ToolExecutionComponent loop-failure results", () => {
 	// Every refused call reports the same two things: that it failed, and why.
 	function expectReportedFailure(output: string): void {
 		expect(output).not.toContain("render error");
-		expect(output).toContain(Bun.stripANSI(themeModule.theme.status.error));
-		expect(output).not.toContain(Bun.stripANSI(themeModule.theme.status.success));
+		expect(output).toContain(stripVTControlCharacters(themeModule.theme.status.error));
+		expect(output).not.toContain(stripVTControlCharacters(themeModule.theme.status.success));
 		expect(output).toContain("non-ASCII");
 	}
 
@@ -67,7 +68,7 @@ describe("ToolExecutionComponent loop-failure results", () => {
 			},
 			false,
 		);
-		expect(Bun.stripANSI(component.render(80).join("\n"))).toContain("Task execution failed: boom");
+		expect(stripVTControlCharacters(component.render(80).join("\n"))).toContain("Task execution failed: boom");
 	});
 
 	// todo_write reports its own failureKind alongside its own details, and its
@@ -88,7 +89,7 @@ describe("ToolExecutionComponent loop-failure results", () => {
 			},
 			false,
 		);
-		const output = Bun.stripANSI(component.render(80).join("\n"));
+		const output = stripVTControlCharacters(component.render(80).join("\n"));
 		expect(output).toContain("Todo Write");
 		expect(output).not.toContain("todo_write");
 	});
@@ -103,6 +104,6 @@ describe("ToolExecutionComponent loop-failure results", () => {
 			},
 			false,
 		);
-		expect(Bun.stripANSI(component.render(80).join("\n"))).not.toContain("render error");
+		expect(stripVTControlCharacters(component.render(80).join("\n"))).not.toContain("render error");
 	});
 });

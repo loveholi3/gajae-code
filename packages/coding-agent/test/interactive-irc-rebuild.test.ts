@@ -1,3 +1,4 @@
+import { stripVTControlCharacters } from "node:util";
 import { afterEach, beforeAll, describe, expect, it, vi } from "bun:test";
 import { EventController } from "@gajae-code/coding-agent/modes/controllers/event-controller";
 import { IrcObservationLedger } from "@gajae-code/coding-agent/modes/irc-observation-ledger";
@@ -53,12 +54,12 @@ it("renders rebuilt IRC observations as one header and one multiline body withou
 
 	const rebuiltComponents = helpers.addRebuiltIrcObservationToChat(incoming);
 	expect(rebuiltComponents).toHaveLength(2);
-	expect(Bun.stripANSI(chatContainer.render(100).join("\n"))).not.toContain("opens sidebar");
+	expect(stripVTControlCharacters(chatContainer.render(100).join("\n"))).not.toContain("opens sidebar");
 
 	chatContainer.clear();
 	const liveComponents = helpers.addLiveIrcObservationToChat(incoming, eligibleArrival);
 	expect(liveComponents).toHaveLength(2);
-	expect(Bun.stripANSI(chatContainer.render(100).join("\n"))).toContain("Ctrl+I opens sidebar");
+	expect(stripVTControlCharacters(chatContainer.render(100).join("\n"))).toContain("Ctrl+I opens sidebar");
 	expect(rebuilt).toHaveBeenCalledTimes(1);
 	expect(live).toHaveBeenCalledTimes(1);
 });
@@ -76,24 +77,24 @@ it("does not consume the hint for visible or unavailable live arrivals", () => {
 	chatContainer.clear();
 
 	helpers.addLiveIrcObservationToChat({ ...incoming, observationId: "eligible" }, eligibleArrival);
-	expect(Bun.stripANSI(chatContainer.render(100).join("\n"))).toContain("Ctrl+I opens sidebar");
+	expect(stripVTControlCharacters(chatContainer.render(100).join("\n"))).toContain("Ctrl+I opens sidebar");
 });
 
 it("suppresses the sidebar hint for an unbound toggle without consuming a later eligible hint", () => {
 	const { helpers, chatContainer } = makeContext();
 	helpers.addLiveIrcObservationToChat(incoming, { ...eligibleArrival, resolvedToggleKey: null });
-	expect(Bun.stripANSI(chatContainer.render(100).join("\n"))).not.toContain("opens sidebar");
+	expect(stripVTControlCharacters(chatContainer.render(100).join("\n"))).not.toContain("opens sidebar");
 
 	chatContainer.clear();
 	helpers.addLiveIrcObservationToChat(
 		{ ...incoming, observationId: "empty" },
 		{ ...eligibleArrival, resolvedToggleKey: "" },
 	);
-	expect(Bun.stripANSI(chatContainer.render(100).join("\n"))).not.toContain("opens sidebar");
+	expect(stripVTControlCharacters(chatContainer.render(100).join("\n"))).not.toContain("opens sidebar");
 
 	chatContainer.clear();
 	helpers.addLiveIrcObservationToChat({ ...incoming, observationId: "bound" }, eligibleArrival);
-	expect(Bun.stripANSI(chatContainer.render(100).join("\n"))).toContain("Ctrl+I opens sidebar");
+	expect(stripVTControlCharacters(chatContainer.render(100).join("\n"))).toContain("Ctrl+I opens sidebar");
 });
 
 it("uses the rebuild-only API for ledger projection", () => {
@@ -279,7 +280,7 @@ describe("IRC rebuild projection", () => {
 		for (let rebuild = 0; rebuild < 2; rebuild++) {
 			chatContainer.clear();
 			helpers.renderSessionContext(context);
-			const transcript = Bun.stripANSI(chatContainer.render(100).join("\n"));
+			const transcript = stripVTControlCharacters(chatContainer.render(100).join("\n"));
 			expect(transcript.indexOf("before")).toBeLessThan(transcript.indexOf("[IRC]"));
 			expect(transcript.indexOf("[IRC]")).toBeLessThan(transcript.indexOf("after"));
 			expect(helpers.getRenderedIrcInlineComponents().size).toBe(1);

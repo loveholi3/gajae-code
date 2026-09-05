@@ -1,3 +1,4 @@
+import { stripVTControlCharacters } from "node:util";
 import { beforeAll, describe, expect, it, vi } from "bun:test";
 import { HookSelectorComponent } from "../../../src/modes/components/hook-selector";
 import { type SessionSelectionResult, SessionSelectorComponent } from "../../../src/modes/components/session-selector";
@@ -55,7 +56,7 @@ function selector(
 }
 
 function text(component: SessionSelectorComponent): string {
-	return Bun.stripANSI(component.render(100).join("\n"));
+	return stripVTControlCharacters(component.render(100).join("\n"));
 }
 
 describe("SessionSelectorComponent resume consent", () => {

@@ -1,3 +1,4 @@
+import { stripVTControlCharacters } from "node:util";
 /**
  * Issue #4650 — TUI render of the provider_safety_stop hint.
  *
@@ -38,7 +39,7 @@ function makeAssistant(overrides: Partial<AssistantMessage> = {}): AssistantMess
 }
 
 function renderPlain(component: AssistantMessageComponent, width = 100): string {
-	return Bun.stripANSI(component.render(width).join("\n"));
+	return stripVTControlCharacters(component.render(width).join("\n"));
 }
 
 /** Compare against wrap-insensitive prose: collapse all whitespace runs. */

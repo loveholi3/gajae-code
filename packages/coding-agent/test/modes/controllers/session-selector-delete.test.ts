@@ -1,3 +1,4 @@
+import { stripVTControlCharacters } from "node:util";
 import { afterEach, beforeAll, describe, expect, it, vi } from "bun:test";
 import { SessionSelectorComponent } from "../../../src/modes/components/session-selector";
 import { initTheme } from "../../../src/modes/theme/theme";
@@ -40,7 +41,7 @@ function createSelector(
 }
 
 function renderText(selector: SessionSelectorComponent): string {
-	return Bun.stripANSI(selector.render(120).join("\n"));
+	return stripVTControlCharacters(selector.render(120).join("\n"));
 }
 
 describe("SessionSelectorComponent delete confirmation", () => {

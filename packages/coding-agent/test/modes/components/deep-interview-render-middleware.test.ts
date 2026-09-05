@@ -1,3 +1,4 @@
+import { stripVTControlCharacters } from "node:util";
 import { beforeAll, describe, expect, it } from "bun:test";
 import type { AssistantMessage } from "@gajae-code/ai";
 import { Settings } from "@gajae-code/coding-agent/config/settings";
@@ -32,7 +33,7 @@ function createAssistantMessage(text: string): AssistantMessage {
 
 function renderAssistantText(text: string): string {
 	const component = new AssistantMessageComponent(createAssistantMessage(text));
-	return Bun.stripANSI(component.render(100).join("\n"));
+	return stripVTControlCharacters(component.render(100).join("\n"));
 }
 
 beforeAll(async () => {
@@ -133,8 +134,8 @@ describe("deep-interview assistant render middleware", () => {
 			"assistant:entry:deep-interview-progress",
 		);
 		const rendered = component.renderWithViewportAnchors(40);
-		const titleRow = rendered.lines.findIndex(line => Bun.stripANSI(line).includes("Round 6 complete"));
-		const koreanRow = rendered.lines.findIndex(line => Bun.stripANSI(line).includes("한국어 기준 유지"));
+		const titleRow = rendered.lines.findIndex(line => stripVTControlCharacters(line).includes("Round 6 complete"));
+		const koreanRow = rendered.lines.findIndex(line => stripVTControlCharacters(line).includes("한국어 기준 유지"));
 		expect(titleRow).toBeGreaterThanOrEqual(0);
 		expect(koreanRow).toBeGreaterThanOrEqual(0);
 		expect(rendered.anchors[titleRow]?.id).toBe("assistant:entry:deep-interview-progress:content:0:text");

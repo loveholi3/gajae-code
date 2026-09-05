@@ -1,3 +1,4 @@
+import { stripVTControlCharacters } from "node:util";
 import { afterEach, describe, expect, it } from "bun:test";
 import {
 	computeIrcSplitWidths,
@@ -192,7 +193,7 @@ describe("IrcSplitViewComponent", () => {
 		const split = new IrcSplitViewComponent(left, ledger, sidebarTheme);
 
 		const hidden = split.renderWithViewportAnchors(80);
-		const hiddenPlain = hidden.lines.map(line => Bun.stripANSI(line));
+		const hiddenPlain = hidden.lines.map(line => stripVTControlCharacters(line));
 		const hiddenSemantic = hiddenPlain.findIndex(line => line.includes("semantic transcript row"));
 		const hiddenInline = hiddenPlain.findIndex(line => line.includes("inline IRC row"));
 		expect(hidden.anchors[hiddenSemantic]?.id).toBe("message-1");
@@ -200,7 +201,7 @@ describe("IrcSplitViewComponent", () => {
 
 		split.setVisible(true);
 		const visible = split.renderWithViewportAnchors(80);
-		const visiblePlain = visible.lines.map(line => Bun.stripANSI(line));
+		const visiblePlain = visible.lines.map(line => stripVTControlCharacters(line));
 		const visibleSemantic = visiblePlain.findIndex(line => line.includes("semantic transcript row"));
 		const visibleInline = visiblePlain.findIndex(line => line.includes("inline IRC row"));
 		expect(visible.anchors[visibleSemantic]?.id).toBe("message-1");
@@ -224,7 +225,7 @@ describe("IrcSplitViewComponent", () => {
 		const split = new IrcSplitViewComponent(new TestPane(["older", "newer", "live tail"]), ledger, sidebarTheme);
 		split.setVisible(true);
 
-		const lines = split.render(80).map(line => Bun.stripANSI(line));
+		const lines = split.render(80).map(line => stripVTControlCharacters(line));
 		const sidebarRows = lines.map(line => line.slice(computeIrcSplitWidths(80).leftWidth + 3));
 		expect(sidebarRows).toContain(`alice → bob · ${localTime(Date.parse("2026-01-02T03:04:05.000Z"))}`);
 		expect(sidebarRows).toContain("  first line");
@@ -244,7 +245,9 @@ describe("IrcSplitViewComponent", () => {
 		const widths = computeIrcSplitWidths(80);
 		const rendered = split.render(80);
 		expect(rendered.every(line => visibleWidth(line) <= 80)).toBe(true);
-		const bodyRows = rendered.map(line => Bun.stripANSI(line).slice(widths.leftWidth + widths.separatorWidth));
+		const bodyRows = rendered.map(line =>
+			stripVTControlCharacters(line).slice(widths.leftWidth + widths.separatorWidth),
+		);
 		expect(bodyRows.filter(line => line.startsWith("  ")).length).toBeGreaterThan(1);
 		expect(bodyRows.every(line => visibleWidth(line) <= widths.rightWidth)).toBe(true);
 	});
@@ -257,7 +260,7 @@ describe("IrcSplitViewComponent", () => {
 		const layout = computeIrcSplitWidths(80);
 		const sidebarRows = split
 			.render(80)
-			.map(line => Bun.stripANSI(line).slice(layout.leftWidth + layout.separatorWidth))
+			.map(line => stripVTControlCharacters(line).slice(layout.leftWidth + layout.separatorWidth))
 			.filter(line => line.startsWith("  "));
 		expect(sidebarRows.length).toBeGreaterThan(1);
 		for (const row of sidebarRows) {
@@ -288,7 +291,7 @@ describe("IrcSplitViewComponent", () => {
 		const split = new IrcSplitViewComponent(new TestPane("left"), ledger, sidebarTheme);
 		split.setVisible(true);
 
-		const rendered = Bun.stripANSI(split.render(80).join("\n"));
+		const rendered = stripVTControlCharacters(split.render(80).join("\n"));
 		expect(rendered).toContain("  line 0");
 		expect(rendered).toContain("  line 79");
 	});
@@ -302,7 +305,7 @@ describe("IrcSplitViewComponent", () => {
 
 		const rendered = split.render(80);
 		expect(rendered.length).toBeLessThanOrEqual(IRC_SIDEBAR_MAX_RENDER_ROWS);
-		expect(Bun.stripANSI(rendered.join("\n"))).toContain("… message elided …");
+		expect(stripVTControlCharacters(rendered.join("\n"))).toContain("… message elided …");
 	});
 
 	it.each(["from", "to"] as const)("bounds a near-budget %s identity before sidebar formatting", field => {
@@ -324,7 +327,7 @@ describe("IrcSplitViewComponent", () => {
 
 		const rendered = split.render(80);
 		expect(rendered.length).toBeLessThanOrEqual(IRC_SIDEBAR_MAX_RENDER_ROWS);
-		expect(Bun.stripANSI(rendered.join("\n"))).toContain("…");
+		expect(stripVTControlCharacters(rendered.join("\n"))).toContain("…");
 	});
 
 	it("clips the UTF-8 source projection only at complete grapheme boundaries", () => {
@@ -333,7 +336,7 @@ describe("IrcSplitViewComponent", () => {
 		const split = new IrcSplitViewComponent(new TestPane("left"), ledger, sidebarTheme);
 		split.setVisible(true);
 
-		const plainLines = split.render(80).map(line => Bun.stripANSI(line));
+		const plainLines = split.render(80).map(line => stripVTControlCharacters(line));
 		expect(plainLines.join("\n")).toContain("… message elided …");
 		expect(plainLines.join("\n")).not.toContain("�");
 		for (const line of plainLines) {
@@ -350,7 +353,7 @@ describe("IrcSplitViewComponent", () => {
 		split.setVisible(true);
 
 		const rendered = split.render(80);
-		const plain = Bun.stripANSI(rendered.join("\n"));
+		const plain = stripVTControlCharacters(rendered.join("\n"));
 		expect(rendered.length).toBeLessThanOrEqual(IRC_SIDEBAR_MAX_RENDER_ROWS);
 		expect(plain).toContain("… older IRC messages elided …");
 		expect(plain).toContain("message-9999");
@@ -363,7 +366,7 @@ describe("IrcSplitViewComponent", () => {
 		const split = new IrcSplitViewComponent(new TestPane("left"), ledger, sidebarTheme);
 
 		split.setVisible(true);
-		expect(Bun.stripANSI(split.render(80).join("\n"))).toContain("backfill");
+		expect(stripVTControlCharacters(split.render(80).join("\n"))).toContain("backfill");
 	});
 
 	it("suppresses terminal graphics only while visible and restores full width when hidden", () => {
@@ -410,7 +413,7 @@ describe("IrcSplitViewComponent", () => {
 		const split = new IrcSplitViewComponent(new TestPane("left"), ledger, sidebarTheme);
 		split.setVisible(true);
 
-		const lines = split.render(80).map(line => Bun.stripANSI(line));
+		const lines = split.render(80).map(line => stripVTControlCharacters(line));
 		expect(lines.every(line => visibleWidth(line) <= 80)).toBe(true);
 		expect(lines.join("\n")).not.toContain("\t");
 	});
@@ -424,7 +427,7 @@ describe("IrcSplitViewComponent", () => {
 		split.setVisible(true);
 		const visible = split.render(80).join("\n");
 		expect(visible).toContain("\x1b_G");
-		expect(Bun.stripANSI(visible)).toContain("peer message");
+		expect(stripVTControlCharacters(visible)).toContain("peer message");
 
 		split.setVisible(false);
 		expect(split.render(80).join("\n")).toContain("\x1b_G");
@@ -437,7 +440,7 @@ describe("IrcSplitViewComponent", () => {
 		split.setVisible(true);
 		const visible = split.render(80);
 		expect(visible.join("\n")).not.toContain("\x1b]1337;File=");
-		expect(Bun.stripANSI(visible.join("\n"))).toContain("[image/png");
+		expect(stripVTControlCharacters(visible.join("\n"))).toContain("[image/png");
 		expect(visible.every(line => visibleWidth(line) <= 80)).toBe(true);
 
 		split.setVisible(false);
@@ -451,7 +454,7 @@ describe("IrcSplitViewComponent", () => {
 		split.setVisible(true);
 		const visible = split.render(80).join("\n");
 		expect(visible).not.toContain("\x1bP");
-		expect(Bun.stripANSI(visible)).toContain("[image/png");
+		expect(stripVTControlCharacters(visible)).toContain("[image/png");
 	});
 
 	it("resolves injected theme accessors and message styles on every render", () => {
@@ -482,9 +485,9 @@ describe("IrcSplitViewComponent", () => {
 		const split = new IrcSplitViewComponent(new TestPane("left"), ledger, sidebarTheme);
 		split.setVisible(true);
 
-		expect(Bun.stripANSI(split.render(80).join("\n"))).toContain("first entry");
+		expect(stripVTControlCharacters(split.render(80).join("\n"))).toContain("first entry");
 		addRecord(ledger, "second entry", "second");
-		const rendered = Bun.stripANSI(split.render(80).join("\n"));
+		const rendered = stripVTControlCharacters(split.render(80).join("\n"));
 		expect(rendered).toContain("first entry");
 		expect(rendered).toContain("second entry");
 	});
@@ -494,10 +497,10 @@ describe("IrcSplitViewComponent", () => {
 		addRecord(ledger, "reset entry", "reset");
 		const split = new IrcSplitViewComponent(new TestPane("left"), ledger, sidebarTheme);
 		split.setVisible(true);
-		expect(Bun.stripANSI(split.render(80).join("\n"))).toContain("reset entry");
+		expect(stripVTControlCharacters(split.render(80).join("\n"))).toContain("reset entry");
 
 		ledger.reset();
-		expect(Bun.stripANSI(split.render(80).join("\n"))).not.toContain("reset entry");
+		expect(stripVTControlCharacters(split.render(80).join("\n"))).not.toContain("reset entry");
 	});
 
 	it("hashes semantic tokens compactly while preserving and changing them with projected semantics", () => {

@@ -1,3 +1,4 @@
+import { stripVTControlCharacters } from "node:util";
 import { afterEach, beforeAll, beforeEach, describe, expect, it, vi } from "bun:test";
 import * as fs from "node:fs/promises";
 import * as path from "node:path";
@@ -298,7 +299,7 @@ describe("InteractiveMode plan review rendering", () => {
 					snapshotHash: planSnapshotHash(changedPlan),
 				});
 			const auditCount = mode.chatContainer.children.filter(child =>
-				Bun.stripANSI(child.render(200).join("\n")).includes("Plan approval audit"),
+				stripVTControlCharacters(child.render(200).join("\n")).includes("Plan approval audit"),
 			).length;
 			const promptCount = prompt.mock.calls.length;
 
@@ -319,7 +320,7 @@ describe("InteractiveMode plan review rendering", () => {
 			expect(prompt.mock.calls).toHaveLength(promptCount);
 			expect(
 				mode.chatContainer.children.filter(child =>
-					Bun.stripANSI(child.render(200).join("\n")).includes("Plan approval audit"),
+					stripVTControlCharacters(child.render(200).join("\n")).includes("Plan approval audit"),
 				),
 			).toHaveLength(auditCount);
 		}
@@ -470,7 +471,7 @@ describe("InteractiveMode plan review rendering", () => {
 			mode.chatContainer.children
 				.at(-1)
 				?.render(40)
-				.map(line => Bun.stripANSI(line).trimEnd())
+				.map(line => stripVTControlCharacters(line).trimEnd())
 				.join("\n") ?? "";
 		expect(audit).toBe(`
 ────────────────────────────────────────
@@ -973,7 +974,7 @@ describe("InteractiveMode plan review rendering", () => {
 
 	function renderAssistant(message: AssistantMessage, width = 120): string {
 		const component = new AssistantMessageComponent(message);
-		return Bun.stripANSI(component.render(width).join("\n"));
+		return stripVTControlCharacters(component.render(width).join("\n"));
 	}
 
 	/** Build an aborted assistant message with the minimum required fields. */

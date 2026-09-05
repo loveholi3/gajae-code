@@ -1,3 +1,4 @@
+import { stripVTControlCharacters } from "node:util";
 import { afterAll, afterEach, beforeAll, describe, expect, it, vi } from "bun:test";
 import { Agent, type AgentMessage } from "@gajae-code/agent-core";
 import { calculateContextTokens, estimateMessageTokensHeuristic } from "@gajae-code/agent-core/compaction";
@@ -231,7 +232,7 @@ describe("context usage SSOT red-team probes", () => {
 		configureForModel(component);
 
 		const breakdown = computeContextBreakdown(session);
-		const rendered = Bun.stripANSI(component.render(160).join("\n"));
+		const rendered = stripVTControlCharacters(component.render(160).join("\n"));
 		expect(breakdown.source).toBe("provider_anchor");
 		expect(breakdown.usedTokens).toBe(300_000);
 		expect(breakdown.autoCompactBufferTokens).toBeGreaterThanOrEqual(0);
@@ -247,7 +248,7 @@ describe("context usage SSOT red-team probes", () => {
 		configureForModel(component);
 
 		expect(session.getContextUsage()).toBeUndefined();
-		const rendered = Bun.stripANSI(component.render(160).join("\n"));
+		const rendered = stripVTControlCharacters(component.render(160).join("\n"));
 		expect(rendered).toContain("no-model");
 		component.updateSettings({
 			preset: "custom",
@@ -257,7 +258,7 @@ describe("context usage SSOT red-team probes", () => {
 			showHookStatus: false,
 			sessionAccent: false,
 		});
-		expect(Bun.stripANSI(component.render(160).join("\n"))).toContain("?/0");
+		expect(stripVTControlCharacters(component.render(160).join("\n"))).toContain("?/0");
 		component.dispose();
 	});
 
@@ -369,7 +370,7 @@ describe("context usage SSOT red-team probes", () => {
 			source: "unknown",
 		});
 		const breakdown = computeContextBreakdown(session);
-		const report = Bun.stripANSI(renderContextUsage(breakdown, theme));
+		const report = stripVTControlCharacters(renderContextUsage(breakdown, theme));
 
 		expect(breakdown.usedTokens).toBeNull();
 		expect(breakdown.freeTokens).toBeGreaterThanOrEqual(0);

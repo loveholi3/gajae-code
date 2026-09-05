@@ -1,3 +1,4 @@
+import { stripVTControlCharacters } from "node:util";
 import { beforeAll, describe, expect, it } from "bun:test";
 import { visibleWidth } from "@gajae-code/tui";
 import { formatKeyHints, KEYBINDINGS, KeybindingsManager } from "../src/config/keybindings";
@@ -132,8 +133,8 @@ describe("status line action hints", () => {
 		const linux = getAvailableActionHints(registry, () => keybindings, 120, "composer", { platform: "linux" });
 
 		expect(darwin.map(hint => hint.id)).toEqual(["app.commandPalette.open"]);
-		expect(Bun.stripANSI(darwin[0]?.content ?? "")).toBe("⌥⌘P Open command palette");
-		expect(Bun.stripANSI(linux[0]?.content ?? "")).toBe("Alt+Super+P Open command palette");
+		expect(stripVTControlCharacters(darwin[0]?.content ?? "")).toBe("⌥⌘P Open command palette");
+		expect(stripVTControlCharacters(linux[0]?.content ?? "")).toBe("Alt+Super+P Open command palette");
 		expect(darwin.map(hint => hint.id)).not.toContain("app.plan.toggle");
 		expect(darwin.map(hint => hint.id)).not.toContain("app.model.select");
 

@@ -1,3 +1,4 @@
+import { stripVTControlCharacters } from "node:util";
 import { visibleWidth } from "@gajae-code/tui";
 import chalk from "chalk";
 import { KeybindingsManager, type KeyDisplayContext } from "../../../src/config/keybindings";
@@ -145,7 +146,7 @@ function actionRegistry(busy: boolean): ActionRegistry<void> {
 function fit(lines: string[], viewport: Viewport): string {
 	for (const line of lines)
 		if (visibleWidth(line) > viewport.columns)
-			throw new Error(`Rendered line exceeds ${viewport.id}: ${Bun.stripANSI(line)}`);
+			throw new Error(`Rendered line exceeds ${viewport.id}: ${stripVTControlCharacters(line)}`);
 	if (lines.length > viewport.rows) throw new Error(`Rendered surface exceeds ${viewport.id}: ${lines.length} rows`);
 	while (lines.length < viewport.rows) lines.push("");
 	return `${lines.join("\n")}\n`;
@@ -233,9 +234,11 @@ export async function renderPlatformShortcutLabelsShowcase(
 				? renderStatus(entry, context)
 				: renderWelcome(entry, context);
 		const terminalAnsiText =
-			entry.renderMode === "ascii-no-color" ? Bun.stripANSI(fit(lines, entry.viewport)) : fit(lines, entry.viewport);
+			entry.renderMode === "ascii-no-color"
+				? stripVTControlCharacters(fit(lines, entry.viewport))
+				: fit(lines, entry.viewport);
 		return {
-			terminalText: Bun.stripANSI(terminalAnsiText),
+			terminalText: stripVTControlCharacters(terminalAnsiText),
 			terminalAnsiText,
 			captureMode: "fixture-injected-platform",
 			platformProvenance: "fixture-injected-platform",

@@ -1,3 +1,4 @@
+import { stripVTControlCharacters } from "node:util";
 import { afterEach, describe, expect, it, vi } from "bun:test";
 import { GenAIAttr, resolveTelemetry, startChatSpan } from "@gajae-code/agent-core/telemetry";
 import { createMockModel } from "@gajae-code/ai/providers/mock";
@@ -825,7 +826,7 @@ describe("subagent await progress visibility boundary", () => {
 
 		const theme = (await getThemeByName("red-claw"))!;
 		setThemeInstance(theme);
-		const rendered = Bun.stripANSI(
+		const rendered = stripVTControlCharacters(
 			subagentToolRenderer
 				.renderResult(result, { expanded: true, isPartial: true, spinnerFrame: 0 }, theme)
 				.render(160)
@@ -845,7 +846,7 @@ describe("subagent await progress visibility boundary", () => {
 				})),
 			},
 		};
-		const staleRendered = Bun.stripANSI(
+		const staleRendered = stripVTControlCharacters(
 			subagentToolRenderer
 				.renderResult(staleResult, { expanded: true, isPartial: true, spinnerFrame: 0 }, theme)
 				.render(160)

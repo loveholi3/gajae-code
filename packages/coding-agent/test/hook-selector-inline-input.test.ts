@@ -1,3 +1,4 @@
+import { stripVTControlCharacters } from "node:util";
 import { beforeAll, describe, expect, it } from "bun:test";
 import { HookSelectorComponent } from "@gajae-code/coding-agent/modes/components/hook-selector";
 import { getThemeByName, setThemeInstance } from "@gajae-code/coding-agent/modes/theme/theme";
@@ -53,7 +54,7 @@ function createSelector(opts?: {
 }
 
 function renderText(component: HookSelectorComponent, width = 80): string {
-	return Bun.stripANSI(component.render(width).join("\n"));
+	return stripVTControlCharacters(component.render(width).join("\n"));
 }
 
 function moveToOther(component: HookSelectorComponent): void {
@@ -129,7 +130,7 @@ describe("HookSelectorComponent inline custom input", () => {
 
 		const rendered = component.render(80).join("\n");
 		const markerIndex = rendered.indexOf(CURSOR_MARKER);
-		const promptIndex = Bun.stripANSI(rendered).indexOf("> ");
+		const promptIndex = stripVTControlCharacters(rendered).indexOf("> ");
 
 		expect(markerIndex).toBeGreaterThanOrEqual(0);
 		expect(promptIndex).toBeGreaterThan(rendered.indexOf("3. Other"));

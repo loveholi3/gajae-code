@@ -1,3 +1,4 @@
+import { stripVTControlCharacters } from "node:util";
 import { afterEach, beforeEach, describe, expect, it, vi } from "bun:test";
 import * as fs from "node:fs/promises";
 import * as os from "node:os";
@@ -56,13 +57,13 @@ describe("apply_patch rendering", () => {
 			false,
 		);
 
-		const collapsed = Bun.stripANSI(component.render(140).join("\n"));
+		const collapsed = stripVTControlCharacters(component.render(140).join("\n"));
 		expect(collapsed).toContain("src/demo.ts");
 		expect(collapsed).not.toContain("+new");
 		expect(collapsed).not.toContain("(no output)");
 
 		component.setExpanded(true);
-		const expanded = Bun.stripANSI(component.render(140).join("\n"));
+		const expanded = stripVTControlCharacters(component.render(140).join("\n"));
 		expect(expanded).toContain("src/demo.ts");
 		expect(expanded).toContain("+new");
 		expect(expanded).not.toContain("(no output)");
@@ -85,7 +86,7 @@ describe("apply_patch rendering", () => {
 			{ expanded: false, isPartial: true, renderContext: { editMode: "apply_patch" } },
 			uiTheme,
 		);
-		const rendered = Bun.stripANSI(component.render(160).join("\n"));
+		const rendered = stripVTControlCharacters(component.render(160).join("\n"));
 
 		expect(rendered).toContain("src/first.ts");
 		expect(rendered).toContain("Edit");
@@ -101,7 +102,7 @@ describe("apply_patch rendering", () => {
 			{ expanded: false, isPartial: true, renderContext: { editMode: "apply_patch" } },
 			uiTheme,
 		);
-		const rendered = Bun.stripANSI(component.render(160).join("\n"));
+		const rendered = stripVTControlCharacters(component.render(160).join("\n"));
 
 		expect(rendered).toContain("src/streaming.ts");
 		expect(rendered).not.toContain("The last line of the patch must be");
@@ -116,7 +117,7 @@ describe("apply_patch rendering", () => {
 			{ expanded: true, isPartial: true },
 			uiTheme,
 		);
-		const rendered = Bun.stripANSI(component.render(160).join("\n"));
+		const rendered = stripVTControlCharacters(component.render(160).join("\n"));
 
 		expect(rendered).toContain("src/bad.ts");
 		expect(rendered).toContain("is empty");
@@ -139,14 +140,14 @@ describe("apply_patch rendering", () => {
 
 			const component = new ToolExecutionComponent("apply_patch", { input }, {}, undefined, uiStub, tmpDir);
 			component.setExpanded(true);
-			const before = Bun.stripANSI(component.render(160).join("\n"));
+			const before = stripVTControlCharacters(component.render(160).join("\n"));
 			expect(before).not.toContain("(preview)");
 
 			component.setArgsComplete();
 			component.setExpanded(true);
 			await Bun.sleep(50);
 
-			const after = Bun.stripANSI(component.render(160).join("\n"));
+			const after = stripVTControlCharacters(component.render(160).join("\n"));
 			expect(after).toContain("const value = 2;");
 		} finally {
 			await fs.rm(tmpDir, { recursive: true, force: true });
@@ -213,7 +214,7 @@ describe("apply_patch rendering", () => {
 		);
 
 		component.setExpanded(true);
-		const rendered = Bun.stripANSI(component.render(220).join("\n"));
+		const rendered = stripVTControlCharacters(component.render(220).join("\n"));
 		expect(rendered).toContain("  10│}");
 		expect(rendered).toContain(" +11│import");
 		expect(rendered).toContain(" 228│");

@@ -1,3 +1,4 @@
+import { stripVTControlCharacters } from "node:util";
 import { beforeAll, describe, expect, it, type Mock, vi } from "bun:test";
 import type { AssistantMessage, Usage } from "@gajae-code/ai";
 import { BtwController } from "@gajae-code/coding-agent/modes/controllers/btw-controller";
@@ -146,7 +147,7 @@ describe("BtwController", () => {
 		await Promise.resolve();
 		await Promise.resolve();
 
-		const rendered = Bun.stripANSI(btwContainer.render(80).join("\n"));
+		const rendered = stripVTControlCharacters(btwContainer.render(80).join("\n"));
 		expect(rendered).toContain("Side-chat request failed.");
 		expect(rendered).not.toContain("side establishment failed");
 		expect(session.abort).not.toHaveBeenCalled();
@@ -327,6 +328,6 @@ describe("BtwController", () => {
 		});
 		await Promise.resolve();
 		expect(controller.hasActiveRequest()).toBe(false);
-		expect(Bun.stripANSI(btwContainer.render(80).join("\n"))).not.toContain("LATE_PRIVATE_DELTA");
+		expect(stripVTControlCharacters(btwContainer.render(80).join("\n"))).not.toContain("LATE_PRIVATE_DELTA");
 	});
 });

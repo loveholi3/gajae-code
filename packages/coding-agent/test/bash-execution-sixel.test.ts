@@ -1,3 +1,4 @@
+import { stripVTControlCharacters } from "node:util";
 import { afterEach, beforeEach, describe, expect, it } from "bun:test";
 import { BashExecutionComponent } from "@gajae-code/coding-agent/modes/components/bash-execution";
 import { IrcSplitViewComponent } from "@gajae-code/coding-agent/modes/components/irc-sidebar";
@@ -50,9 +51,9 @@ describe("BashExecutionComponent SIXEL sanitization", () => {
 
 		const rendered = component.render(160).join("\n");
 		expect(rendered).toContain(SIXEL);
-		expect(Bun.stripANSI(rendered)).toContain("line 0");
-		expect(Bun.stripANSI(rendered)).toContain("line 24");
-		expect(Bun.stripANSI(rendered)).not.toContain("more lines");
+		expect(stripVTControlCharacters(rendered)).toContain("line 0");
+		expect(stripVTControlCharacters(rendered)).toContain("line 24");
+		expect(stripVTControlCharacters(rendered)).not.toContain("more lines");
 	});
 
 	it("does not truncate long SIXEL payload lines", () => {
@@ -126,7 +127,7 @@ describe("BashExecutionComponent SIXEL sanitization", () => {
 		component.setComplete(0, false, { output: SIXEL });
 
 		const visible = split.render(160).join("\n");
-		expect(Bun.stripANSI(visible)).toContain("[SIXEL image hidden while IRC sidebar is visible]");
+		expect(stripVTControlCharacters(visible)).toContain("[SIXEL image hidden while IRC sidebar is visible]");
 		expect(visible).not.toContain("\x1bP");
 
 		split.setVisible(false);
@@ -144,7 +145,7 @@ describe("BashExecutionComponent SIXEL sanitization", () => {
 		component.setExpanded(true);
 
 		const visible = split.render(160).join("\n");
-		expect(Bun.stripANSI(visible)).toContain("[SIXEL image hidden while IRC sidebar is visible]");
+		expect(stripVTControlCharacters(visible)).toContain("[SIXEL image hidden while IRC sidebar is visible]");
 		expect(visible).not.toContain("\x1bP");
 	});
 
@@ -158,7 +159,7 @@ describe("BashExecutionComponent SIXEL sanitization", () => {
 		component.setComplete(0, false, { output: `before\n${SIXEL}\nafter` });
 
 		const visible = split.render(160).join("\n");
-		expect(Bun.stripANSI(visible)).toContain("[SIXEL image hidden while IRC sidebar is visible]");
+		expect(stripVTControlCharacters(visible)).toContain("[SIXEL image hidden while IRC sidebar is visible]");
 		expect(visible).not.toContain("\x1bP");
 		split.setVisible(false);
 		expect(split.render(160).join("\n")).toContain(SIXEL);
@@ -175,7 +176,7 @@ describe("BashExecutionComponent SIXEL sanitization", () => {
 		});
 		split.setVisible(true);
 		const raw = split.render(160).join("\n");
-		const visible = Bun.stripANSI(raw);
+		const visible = stripVTControlCharacters(raw);
 		expect(visible).toContain("line 6");
 		expect(visible).not.toContain("line 0");
 		expect(visible).toContain("[SIXEL image hidden while IRC sidebar is visible]");
@@ -196,7 +197,7 @@ describe("BashExecutionComponent SIXEL sanitization", () => {
 		component.setExpanded(true);
 		split.setVisible(true);
 		const raw = split.render(120).join("\n");
-		const visible = Bun.stripANSI(raw);
+		const visible = stripVTControlCharacters(raw);
 		expect(visible).toContain("line 0");
 		expect(visible).toContain("[SIXEL image hidden while IRC sidebar is visible]");
 		expect(raw).not.toContain("\x1bP");

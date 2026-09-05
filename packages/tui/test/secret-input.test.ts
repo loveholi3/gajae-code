@@ -1,3 +1,4 @@
+import { stripVTControlCharacters } from "node:util";
 import { describe, expect, it } from "bun:test";
 import { CURSOR_MARKER, SecretInput, type SecretValue } from "@gajae-code/tui";
 
@@ -9,7 +10,7 @@ function renderSnapshot(input: SecretInput, width = 80): string {
 }
 
 function expectMaskedSnapshot(snapshot: string): void {
-	const visible = Bun.stripANSI(snapshot.replaceAll(CURSOR_MARKER, ""));
+	const visible = stripVTControlCharacters(snapshot.replaceAll(CURSOR_MARKER, ""));
 	expect(snapshot).not.toContain(TELEGRAM_TOKEN);
 	expect(visible).not.toMatch(TELEGRAM_TOKEN_PATTERN);
 	expect(visible).toMatch(/^> [• ]*$/);
@@ -60,7 +61,7 @@ describe("SecretInput", () => {
 		expect(submitted).toBeDefined();
 		expect(submitted?.consume()).toBe(`${TELEGRAM_TOKEN}화면`);
 		expect(submitted?.consume()).toBe("");
-		expect(Bun.stripANSI(renderSnapshot(input))).not.toContain(TELEGRAM_TOKEN);
+		expect(stripVTControlCharacters(renderSnapshot(input))).not.toContain(TELEGRAM_TOKEN);
 	});
 
 	it("clears and disposes all publicly accessible secret state", () => {
@@ -72,7 +73,7 @@ describe("SecretInput", () => {
 		input.clear();
 		input.handleInput("\x1b[201~");
 		input.handleInput("\x19"); // Ctrl+Y cannot recover a cleared kill ring
-		expect(Bun.stripANSI(renderSnapshot(input))).not.toContain(TELEGRAM_TOKEN);
+		expect(stripVTControlCharacters(renderSnapshot(input))).not.toContain(TELEGRAM_TOKEN);
 
 		let cleared: SecretValue | undefined;
 		input.onSubmit = value => {

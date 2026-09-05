@@ -1,3 +1,4 @@
+import { stripVTControlCharacters } from "node:util";
 import { afterEach, beforeAll, describe, expect, it, vi } from "bun:test";
 import * as fs from "node:fs/promises";
 import * as os from "node:os";
@@ -159,7 +160,7 @@ describe("IRC visualization red-team", () => {
 		component.setComplete(0, false, { output });
 		const raw = visibleSplit(component).render(160).join("\n");
 		await fs.writeFile(path.join(artifactDir, "collapsed-sixel-visible.ansi"), raw);
-		const plain = Bun.stripANSI(raw);
+		const plain = stripVTControlCharacters(raw);
 
 		expect(plain.split(SIXEL_PLACEHOLDER).length - 1).toBe(1);
 		expect(plain).toMatch(/more lines/u);

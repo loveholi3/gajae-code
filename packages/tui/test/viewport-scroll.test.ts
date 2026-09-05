@@ -1,3 +1,4 @@
+import { stripVTControlCharacters } from "node:util";
 import { describe, expect, it } from "bun:test";
 import {
 	type Component,
@@ -61,7 +62,7 @@ class Lines implements Component {
 		let cellOffset = 0;
 		const segmenter = new Intl.Segmenter("en", { granularity: "grapheme" });
 		const anchors = this.#lines.map(line => {
-			const graphemeCount = [...segmenter.segment(Bun.stripANSI(line))].length;
+			const graphemeCount = [...segmenter.segment(stripVTControlCharacters(line))].length;
 			const cellCount = Bun.stringWidth(line);
 			const anchor =
 				graphemeCount === 0

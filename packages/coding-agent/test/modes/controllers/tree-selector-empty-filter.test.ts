@@ -1,3 +1,4 @@
+import { stripVTControlCharacters } from "node:util";
 import { beforeAll, describe, expect, it, vi } from "bun:test";
 import { TreeSelectorComponent } from "../../../src/modes/components/tree-selector";
 import { initTheme } from "../../../src/modes/theme/theme";
@@ -21,7 +22,7 @@ function createNode(id: string, content: string): SessionTreeNode {
 }
 
 function renderText(selector: TreeSelectorComponent): string {
-	return Bun.stripANSI(selector.render(100).join("\n"));
+	return stripVTControlCharacters(selector.render(100).join("\n"));
 }
 
 describe("TreeSelectorComponent empty-filter navigation", () => {

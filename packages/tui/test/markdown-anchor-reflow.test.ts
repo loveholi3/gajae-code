@@ -1,3 +1,4 @@
+import { stripVTControlCharacters } from "node:util";
 import { describe, expect, it } from "bun:test";
 import { Container, Markdown, TUI, VIEWPORT_ANCHOR_PREFIX, type ViewportAnchorRow } from "@gajae-code/tui";
 import { defaultMarkdownTheme } from "./test-themes";
@@ -21,7 +22,7 @@ function resolveRow(
 }
 
 function rowWithText(lines: string[], needle: string): number {
-	return lines.findIndex(line => Bun.stripANSI(line).includes(needle));
+	return lines.findIndex(line => stripVTControlCharacters(line).includes(needle));
 }
 
 function render(text: string, width: number, id: string) {

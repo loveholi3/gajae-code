@@ -1,3 +1,4 @@
+import { stripVTControlCharacters } from "node:util";
 import { beforeAll, describe, expect, it, vi } from "bun:test";
 import { HookSelectorComponent } from "@gajae-code/coding-agent/modes/components/hook-selector";
 import { getThemeByName, setThemeInstance, theme } from "@gajae-code/coding-agent/modes/theme/theme";
@@ -22,7 +23,7 @@ function stripBorder(line: string, glyph: string): string {
  * `FocusAwareList.render` so tests don't depend on the styled (ANSI) form.
  */
 function bareSelectedPrefix(): string {
-	return Bun.stripANSI(theme.fg("accent", `${theme.nav.cursor} `));
+	return stripVTControlCharacters(theme.fg("accent", `${theme.nav.cursor} `));
 }
 
 beforeAll(async () => {
@@ -83,7 +84,7 @@ function renderStripped(
 		() => {},
 		opts,
 	);
-	return Bun.stripANSI(component.render(width).join("\n"));
+	return stripVTControlCharacters(component.render(width).join("\n"));
 }
 
 describe("HookSelectorComponent", () => {
@@ -104,7 +105,7 @@ describe("HookSelectorComponent", () => {
 		const width = 80;
 		const lines = component.render(width);
 		for (const line of lines) {
-			expect(visibleWidth(Bun.stripANSI(line))).toBeLessThanOrEqual(width);
+			expect(visibleWidth(stripVTControlCharacters(line))).toBeLessThanOrEqual(width);
 		}
 	});
 
@@ -370,7 +371,7 @@ describe("HookSelectorComponent", () => {
 			},
 		);
 
-		const rendered = Bun.stripANSI(component.render(88).join("\n"));
+		const rendered = stripVTControlCharacters(component.render(88).join("\n"));
 		const titleRows = rendered.split("\n").filter(line => line.includes("Prompt row"));
 
 		expect(titleRows.length).toBeLessThanOrEqual(3);
@@ -399,7 +400,7 @@ describe("HookSelectorComponent", () => {
 		);
 
 		const renderedRows = component.render(32);
-		const rendered = Bun.stripANSI(renderedRows.join("\n"));
+		const rendered = stripVTControlCharacters(renderedRows.join("\n"));
 		const titleRows = rendered
 			.split("\n")
 			.filter(line =>
@@ -417,7 +418,7 @@ describe("HookSelectorComponent", () => {
 		expect(rendered).toContain("▼ more");
 
 		for (let page = 0; page < 10; page++) component.handleInput("\x1b[6~");
-		expect(Bun.stripANSI(component.render(32).join("\n"))).toContain("behavior before selecting");
+		expect(stripVTControlCharacters(component.render(32).join("\n"))).toContain("behavior before selecting");
 	});
 
 	it("uses selector-local PageUp/PageDown for title scrolling without moving option focus", () => {
@@ -433,13 +434,13 @@ describe("HookSelectorComponent", () => {
 			{ outline: true, wrapFocused: true, scrollTitleRows: 2, maxVisible: 2 },
 		);
 
-		const initial = Bun.stripANSI(component.render(56).join("\n"));
+		const initial = stripVTControlCharacters(component.render(56).join("\n"));
 		expect(initial).toContain("Question segment 1");
 		expect(initial).not.toContain("Question segment 8");
 		expect(initial).toContain("first-choice");
 
 		for (let i = 0; i < 16; i++) component.handleInput("\x1b[6~");
-		const afterPageDown = Bun.stripANSI(component.render(56).join("\n"));
+		const afterPageDown = stripVTControlCharacters(component.render(56).join("\n"));
 		expect(afterPageDown).not.toContain("Question segment 1");
 		expect(afterPageDown).toContain("Question segment 8");
 		expect(afterPageDown).toContain("first-choice");
@@ -448,7 +449,7 @@ describe("HookSelectorComponent", () => {
 		expect(selected).toBe("first-choice");
 
 		for (let i = 0; i < 16; i++) component.handleInput("\x1b[5~");
-		const afterPageUp = Bun.stripANSI(component.render(56).join("\n"));
+		const afterPageUp = stripVTControlCharacters(component.render(56).join("\n"));
 		expect(afterPageUp).toContain("Question segment 1");
 	});
 	it("keeps the visible premise anchored across title reflow", () => {
@@ -466,15 +467,15 @@ describe("HookSelectorComponent", () => {
 
 		component.render(80);
 		component.handleInput("\x1b[6~");
-		const wide = Bun.stripANSI(component.render(80).join("\n"));
+		const wide = stripVTControlCharacters(component.render(80).join("\n"));
 		expect(wide).toContain("Premise segment 2");
 		expect(wide).toContain("first-choice");
 
-		const narrow = Bun.stripANSI(component.render(30).join("\n"));
+		const narrow = stripVTControlCharacters(component.render(30).join("\n"));
 		expect(narrow).toContain("Premise segment 2");
 		expect(narrow).toContain("first-choice");
 
-		const wideAgain = Bun.stripANSI(component.render(80).join("\n"));
+		const wideAgain = stripVTControlCharacters(component.render(80).join("\n"));
 		expect(wideAgain).toContain("Premise segment 2");
 		expect(wideAgain).toContain("first-choice");
 	});
@@ -491,7 +492,7 @@ describe("HookSelectorComponent", () => {
 
 		for (let page = 0; page < 4; page++) {
 			const renderedRows = new Set(
-				Bun.stripANSI(component.render(56).join("\n"))
+				stripVTControlCharacters(component.render(56).join("\n"))
 					.split("\n")
 					.map(line => line.trim()),
 			);
@@ -513,9 +514,9 @@ describe("HookSelectorComponent", () => {
 			{ outline: true, wrapFocused: true, scrollTitleRows: 1, maxVisible: 1 },
 		);
 
-		expect(Bun.stripANSI(component.render(24).join("\n"))).toContain("Premise content 1");
+		expect(stripVTControlCharacters(component.render(24).join("\n"))).toContain("Premise content 1");
 		component.handleInput("\x1b[6~");
-		expect(Bun.stripANSI(component.render(24).join("\n"))).toContain("Premise content 2");
+		expect(stripVTControlCharacters(component.render(24).join("\n"))).toContain("Premise content 2");
 	});
 	it("keeps the bottom premise page stable across a countdown repaint", () => {
 		vi.useFakeTimers();
@@ -535,12 +536,12 @@ describe("HookSelectorComponent", () => {
 			component.render(56);
 			component.handleInput("\x1b[6~");
 
-			const beforeTick = Bun.stripANSI(component.render(56).join("\n"));
+			const beforeTick = stripVTControlCharacters(component.render(56).join("\n"));
 			expect(beforeTick).toContain("Timed premise row 20");
 
 			vi.advanceTimersByTime(1_000);
 
-			const afterTick = Bun.stripANSI(component.render(56).join("\n"));
+			const afterTick = stripVTControlCharacters(component.render(56).join("\n"));
 			expect(afterTick).toContain("Timed premise row 20");
 			expect(afterTick).not.toContain("▼ more");
 		} finally {
@@ -561,12 +562,12 @@ describe("HookSelectorComponent", () => {
 			{ outline: true, wrapFocused: true, scrollTitleRows: 2, maxVisible: 2 },
 		);
 
-		const initial = Bun.stripANSI(component.render(56).join("\n"));
+		const initial = stripVTControlCharacters(component.render(56).join("\n"));
 		expect(initial).toContain("Ctrl segment 1");
 		expect(initial).not.toContain("Ctrl segment 8");
 
 		for (let i = 0; i < 16; i++) component.handleInput("\x04");
-		const afterCtrlD = Bun.stripANSI(component.render(56).join("\n"));
+		const afterCtrlD = stripVTControlCharacters(component.render(56).join("\n"));
 		expect(afterCtrlD).not.toContain("Ctrl segment 1");
 		expect(afterCtrlD).toContain("Ctrl segment 8");
 		expect(afterCtrlD).toContain("first-choice");
@@ -575,7 +576,7 @@ describe("HookSelectorComponent", () => {
 		expect(selected).toBe("first-choice");
 
 		for (let i = 0; i < 16; i++) component.handleInput("\x15");
-		const afterCtrlU = Bun.stripANSI(component.render(56).join("\n"));
+		const afterCtrlU = stripVTControlCharacters(component.render(56).join("\n"));
 		expect(afterCtrlU).toContain("Ctrl segment 1");
 	});
 });

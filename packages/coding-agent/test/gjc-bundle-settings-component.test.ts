@@ -1,3 +1,4 @@
+import { stripVTControlCharacters } from "node:util";
 import { beforeAll, describe, expect, test } from "bun:test";
 import {
 	GJC_BUNDLE_SETTINGS_CAPTURE_FILES,
@@ -160,7 +161,7 @@ async function ready(component: GjcBundleSettingsComponent): Promise<void> {
 }
 
 function rendered(component: GjcBundleSettingsComponent, width = 120): string {
-	return Bun.stripANSI(component.render(width).join("\n"));
+	return stripVTControlCharacters(component.render(width).join("\n"));
 }
 
 function select(component: GjcBundleSettingsComponent, down = 0): void {

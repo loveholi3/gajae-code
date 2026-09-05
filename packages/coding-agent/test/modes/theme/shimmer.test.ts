@@ -1,3 +1,4 @@
+import { stripVTControlCharacters } from "node:util";
 import { afterEach, describe, expect, it, vi } from "bun:test";
 import { shimmerText } from "../../../src/modes/theme/shimmer";
 import type { Theme } from "../../../src/modes/theme/theme";
@@ -35,6 +36,6 @@ describe("shimmerText", () => {
 		});
 
 		expect(rendered).toContain("\x1b[38;2;12;34;56m");
-		expect(Bun.stripANSI(rendered)).toBe("x");
+		expect(stripVTControlCharacters(rendered)).toBe("x");
 	});
 });

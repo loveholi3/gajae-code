@@ -1,3 +1,4 @@
+import { stripVTControlCharacters } from "node:util";
 import { afterAll, beforeAll, describe, expect, it } from "bun:test";
 import type { AgentMessage } from "@gajae-code/agent-core";
 import { resetSettingsForTest, Settings } from "../src/config/settings";
@@ -108,7 +109,7 @@ describe("context usage cross-surface parity", () => {
 		const usage = session.getContextUsage();
 		if (!usage) throw new Error("Expected the fake session to return context usage");
 		const breakdown = computeContextBreakdown(session);
-		const rendered = Bun.stripANSI(component.render(160).join("\n"));
+		const rendered = stripVTControlCharacters(component.render(160).join("\n"));
 
 		expect(breakdown.source).toBe("provider_anchor");
 		expect(breakdown.usedTokens).toBe(usage.tokens ?? Number.NaN);
@@ -117,7 +118,7 @@ describe("context usage cross-surface parity", () => {
 		expect(rendered).toContain(`${usage.percent!.toFixed(1)}%`);
 		expect(rendered).not.toContain(`${((breakdown.estimatedCategoryTotal / contextWindow) * 100).toFixed(1)}%`);
 
-		const panel = Bun.stripANSI(renderContextUsage(breakdown, theme));
+		const panel = stripVTControlCharacters(renderContextUsage(breakdown, theme));
 		expect(panel).toContain("provider-reported");
 		expect(panel).toContain(`Estimated category total: ${breakdown.estimatedCategoryTotal}`);
 
@@ -140,16 +141,16 @@ describe("context usage cross-surface parity", () => {
 		const usage = session.getContextUsage();
 		if (!usage) throw new Error("Expected the fake session to return context usage");
 		const breakdown = computeContextBreakdown(session);
-		const rendered = Bun.stripANSI(component.render(160).join("\n"));
+		const rendered = stripVTControlCharacters(component.render(160).join("\n"));
 
 		expect(usage.percent).toBeNull();
 		expect(rendered).toContain("?");
 		expect(breakdown.source).toBe("unknown");
 		expect(breakdown.usedTokens).toBeNull();
-		expect(Bun.stripANSI(renderContextUsage(breakdown, theme))).toContain(
+		expect(stripVTControlCharacters(renderContextUsage(breakdown, theme))).toContain(
 			"unknown/200k tokens (exact count unknown until next response)",
 		);
-		expect(Bun.stripANSI(renderContextUsage(breakdown, theme))).toContain("Free space (estimated)");
+		expect(stripVTControlCharacters(renderContextUsage(breakdown, theme))).toContain("Free space (estimated)");
 		expect(buildReport(session)).toContain(
 			"Active context: unknown / 200,000 tokens (exact count unknown until next response)",
 		);
@@ -165,7 +166,7 @@ describe("context usage cross-surface parity", () => {
 		};
 		const session = makeSession(usage);
 		const breakdown = computeContextBreakdown(session);
-		const panel = Bun.stripANSI(renderContextUsage(breakdown, theme));
+		const panel = stripVTControlCharacters(renderContextUsage(breakdown, theme));
 		const report = buildReport(session);
 
 		expect(breakdown.source).toBe("heuristic");

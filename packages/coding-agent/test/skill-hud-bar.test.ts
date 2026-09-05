@@ -1,3 +1,4 @@
+import { stripVTControlCharacters } from "node:util";
 import { describe, expect, it } from "bun:test";
 import { renderSkillHudBar } from "../src/modes/components/skill-hud/render";
 import { STATUS_LINE_PRESETS } from "../src/modes/components/status-line/presets";
@@ -5,11 +6,11 @@ import { theme } from "../src/modes/theme/theme";
 import type { SkillActiveEntry } from "../src/skill-state/active-state";
 
 function renderHudText(entries: readonly SkillActiveEntry[], width: number): string {
-	return Bun.stripANSI(renderSkillHudBar(entries, width)?.join("\n") ?? "");
+	return stripVTControlCharacters(renderSkillHudBar(entries, width)?.join("\n") ?? "");
 }
 
 function visibleWidth(text: string): number {
-	return Bun.stringWidth(Bun.stripANSI(text));
+	return Bun.stringWidth(stripVTControlCharacters(text));
 }
 
 describe("skill HUD bar renderer", () => {
@@ -94,8 +95,8 @@ describe("skill HUD bar renderer", () => {
 		expect(rendered).not.toBeNull();
 		const rows = rendered ?? [];
 		const text = rows.join("\n");
-		expect(rows.every(row => Bun.stringWidth(Bun.stripANSI(row)) > 0)).toBe(true);
-		expect(rows.every(row => Bun.stringWidth(Bun.stripANSI(row)) <= 10)).toBe(true);
+		expect(rows.every(row => Bun.stringWidth(stripVTControlCharacters(row)) > 0)).toBe(true);
+		expect(rows.every(row => Bun.stringWidth(stripVTControlCharacters(row)) <= 10)).toBe(true);
 		expect(rows[0]).not.toBe("◆");
 		expect(text).toContain(theme?.status.error ?? "[!!]");
 		const longSkillRows = renderSkillHudBar(

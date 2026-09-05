@@ -1,3 +1,4 @@
+import { stripVTControlCharacters } from "node:util";
 import { afterEach, describe, expect, it, vi } from "bun:test";
 import type { Theme } from "../src/modes/theme/theme";
 import { renderAsciiBar } from "../src/slash-commands/helpers/format";
@@ -34,7 +35,7 @@ describe("renderAsciiBar", () => {
 
 		const rendered = renderAsciiBar(0.5, 4, testTheme);
 
-		expect(Bun.stripANSI(rendered)).toBe("[██░░] 50%");
+		expect(stripVTControlCharacters(rendered)).toBe("[██░░] 50%");
 	});
 
 	it("colors the shimmer band with the theme accent", () => {
@@ -43,6 +44,6 @@ describe("renderAsciiBar", () => {
 		const rendered = renderAsciiBar(undefined, 4, testTheme);
 
 		expect(rendered).toContain("\x1b[36m");
-		expect(Bun.stripANSI(rendered)).toBe("[····]");
+		expect(stripVTControlCharacters(rendered)).toBe("[····]");
 	});
 });

@@ -1,3 +1,4 @@
+import { stripVTControlCharacters } from "node:util";
 import { beforeAll, describe, expect, it } from "bun:test";
 import { InspectorPanel } from "../../../src/modes/components/extensions/inspector-panel";
 import type { Extension } from "../../../src/modes/components/extensions/types";
@@ -38,7 +39,7 @@ describe("InspectorPanel narrow widths", () => {
 			panel.setExtension(extension);
 
 			for (const width of [0, 1]) {
-				const lines = panel.render(width).map(line => Bun.stripANSI(line));
+				const lines = panel.render(width).map(line => stripVTControlCharacters(line));
 				const headingIndex = lines.indexOf(preview.heading);
 				expect(headingIndex).toBeGreaterThanOrEqual(0);
 				expect(lines[headingIndex + 1]).toBe("");

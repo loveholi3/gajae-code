@@ -1,3 +1,4 @@
+import { stripVTControlCharacters } from "node:util";
 import { beforeAll, describe, expect, test, vi } from "bun:test";
 import { ThinkingLevel } from "@gajae-code/agent-core";
 import type { Model } from "@gajae-code/ai";
@@ -281,7 +282,7 @@ describe("model selector profile red-team", () => {
 		await renderSelector(selector);
 		selector.handleInput("\x1b[C");
 		const rendered = selector.render(240).join("\n");
-		const plain = Bun.stripANSI(rendered);
+		const plain = stripVTControlCharacters(rendered);
 
 		expect(plain).toContain("UnsafeRed Next Name");
 		expect(plain).not.toContain("UnsafeRed\nNext");

@@ -1,3 +1,4 @@
+import { stripVTControlCharacters } from "node:util";
 import { afterEach, beforeAll, describe, expect, it, mock } from "bun:test";
 import * as fs from "node:fs/promises";
 import * as os from "node:os";
@@ -31,7 +32,7 @@ afterEach(async () => {
 });
 
 function visibleText(component: { render(width: number): string[] }): string {
-	return Bun.stripANSI(component.render(180).join("\n"));
+	return stripVTControlCharacters(component.render(180).join("\n"));
 }
 
 function typeText(component: { handleInput(input: string): void }, text: string): void {

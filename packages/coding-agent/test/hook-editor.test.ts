@@ -1,3 +1,4 @@
+import { stripVTControlCharacters } from "node:util";
 import { afterEach, beforeAll, describe, expect, it, vi } from "bun:test";
 import { KeybindingsManager } from "@gajae-code/coding-agent/config/keybindings";
 import { HookEditorComponent } from "@gajae-code/coding-agent/modes/components/hook-editor";
@@ -30,11 +31,11 @@ function createTui(): TUI {
 }
 
 function renderText(component: HookEditorComponent, width = 120): string {
-	return Bun.stripANSI(component.render(width).join("\n"));
+	return stripVTControlCharacters(component.render(width).join("\n"));
 }
 
 function renderLines(component: HookEditorComponent, width = 120): string[] {
-	return Bun.stripANSI(component.render(width).join("\n")).split("\n");
+	return stripVTControlCharacters(component.render(width).join("\n")).split("\n");
 }
 
 type TestContext = InteractiveModeContext & {
@@ -412,7 +413,7 @@ describe("ExtensionUiController hook editor abort", () => {
 		expect(editorContainer.children).toHaveLength(1);
 		expect(ctx.hookSelector).toBeDefined();
 
-		const rendered = Bun.stripANSI(ctx.hookSelector!.render(80).join("\n"));
+		const rendered = stripVTControlCharacters(ctx.hookSelector!.render(80).join("\n"));
 		const lines = rendered.split("\n");
 		expect(lines).toHaveLength(30);
 		expect(rendered).toContain("Prompt row 17");
@@ -450,7 +451,7 @@ describe("ExtensionUiController hook editor abort", () => {
 		for (let index = 0; index < options.length - 1; index++) ctx.hookSelector!.handleInput("\x1b[B");
 		ctx.hookSelector!.handleInput("\n");
 
-		const rendered = Bun.stripANSI(ctx.hookSelector!.render(80).join("\n"));
+		const rendered = stripVTControlCharacters(ctx.hookSelector!.render(80).join("\n"));
 		expect(rendered.split("\n").length).toBeLessThanOrEqual(20);
 		expect(rendered).toContain("Prompt row 1");
 		expect(rendered).toContain("Other");
@@ -512,7 +513,7 @@ describe("ExtensionUiController hook editor abort", () => {
 		ctx.hookSelector!.handleInput("@");
 		await Bun.sleep(150);
 
-		const rendered = Bun.stripANSI(ctx.hookSelector!.render(120).join("\n"));
+		const rendered = stripVTControlCharacters(ctx.hookSelector!.render(120).join("\n"));
 		expect(rendered.split("\n").length).toBeLessThanOrEqual(20);
 		expect(rendered).toContain("line3");
 		expect(rendered).toContain("file0");
@@ -539,7 +540,7 @@ describe("ExtensionUiController hook editor abort", () => {
 			},
 		);
 
-		const rendered = Bun.stripANSI(ctx.hookSelector!.render(40).join("\n"));
+		const rendered = stripVTControlCharacters(ctx.hookSelector!.render(40).join("\n"));
 		expect(rendered.split("\n")).toHaveLength(20);
 		expect(rendered).toContain("Prompt row 1");
 		expect(rendered).toContain("Alpha");
@@ -566,13 +567,13 @@ describe("ExtensionUiController hook editor abort", () => {
 				signal: abortController.signal,
 			},
 		);
-		const optionsRendered = Bun.stripANSI(ctx.hookSelector!.render(19).join("\n"));
+		const optionsRendered = stripVTControlCharacters(ctx.hookSelector!.render(19).join("\n"));
 		expect(optionsRendered).toContain("A deliberately");
 
 		ctx.hookSelector!.handleInput("\x1b[B");
 		ctx.hookSelector!.handleInput("\x1b[B");
 		ctx.hookSelector!.handleInput("\n");
-		const rendered = Bun.stripANSI(ctx.hookSelector!.render(19).join("\n"));
+		const rendered = stripVTControlCharacters(ctx.hookSelector!.render(19).join("\n"));
 		expect(rendered.split("\n").length).toBeLessThanOrEqual(20);
 		expect(rendered).toContain("> ");
 		expect(rendered).toContain("ctrl+g external");
@@ -633,7 +634,7 @@ describe("ExtensionUiController hook editor abort", () => {
 		ctx.hookSelector!.handleInput("@");
 		await Bun.sleep(150);
 
-		const rendered = Bun.stripANSI(ctx.hookSelector!.render(19).join("\n"));
+		const rendered = stripVTControlCharacters(ctx.hookSelector!.render(19).join("\n"));
 		expect(rendered.split("\n").length).toBeLessThanOrEqual(20);
 		expect(rendered).not.toContain("file0");
 
@@ -642,7 +643,7 @@ describe("ExtensionUiController hook editor abort", () => {
 		ctx.hookSelector!.handleInput("\x7f");
 		ctx.hookSelector!.handleInput("@");
 		await Bun.sleep(150);
-		const expanded = Bun.stripANSI(ctx.hookSelector!.render(120).join("\n"));
+		const expanded = stripVTControlCharacters(ctx.hookSelector!.render(120).join("\n"));
 		expect(expanded).toContain("file0");
 		expect(expanded.split("\n").length).toBeLessThanOrEqual(20);
 
@@ -667,7 +668,7 @@ describe("ExtensionUiController hook editor abort", () => {
 			},
 		);
 
-		const beforeResize = Bun.stripANSI(ctx.hookSelector!.render(80).join("\n"));
+		const beforeResize = stripVTControlCharacters(ctx.hookSelector!.render(80).join("\n"));
 		expect(beforeResize.split("\n").length).toBeGreaterThan(20);
 		ctx.hookSelector!.handleInput("\x1b[B");
 		ctx.hookSelector!.handleInput("\x1b[B");
@@ -677,7 +678,7 @@ describe("ExtensionUiController hook editor abort", () => {
 		Object.assign(ctx.ui.terminal, { rows: 20 });
 		process.stdout.emit("resize");
 
-		const afterResize = Bun.stripANSI(ctx.hookSelector!.render(80).join("\n"));
+		const afterResize = stripVTControlCharacters(ctx.hookSelector!.render(80).join("\n"));
 		expect(afterResize.split("\n").length).toBeLessThanOrEqual(20);
 		expect(afterResize).toContain("Prompt row 1");
 		expect(afterResize).toContain("Other");
@@ -704,13 +705,13 @@ describe("ExtensionUiController hook editor abort", () => {
 
 		ctx.hookSelector!.render(80);
 		for (let index = 0; index < 4; index++) ctx.hookSelector!.handleInput("\x1b[6~");
-		const beforeResize = Bun.stripANSI(ctx.hookSelector!.render(80).join("\n"));
+		const beforeResize = stripVTControlCharacters(ctx.hookSelector!.render(80).join("\n"));
 		expect(beforeResize).toContain("Prompt row 20");
 
 		Object.assign(ctx.ui.terminal, { rows: 12 });
 		process.stdout.emit("resize");
 
-		const afterResize = Bun.stripANSI(ctx.hookSelector!.render(80).join("\n"));
+		const afterResize = stripVTControlCharacters(ctx.hookSelector!.render(80).join("\n"));
 		expect(afterResize.split("\n").length).toBeLessThanOrEqual(12);
 		expect(afterResize).toContain("Prompt row 20");
 

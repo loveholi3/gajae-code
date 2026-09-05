@@ -1,3 +1,4 @@
+import { stripVTControlCharacters } from "node:util";
 import { afterEach, beforeAll, beforeEach, describe, expect, it } from "bun:test";
 import * as path from "node:path";
 import type { AssistantMessage } from "@gajae-code/ai";
@@ -31,7 +32,7 @@ function createAssistantMessage(markdown: string): AssistantMessage {
 
 function renderAssistantMessage(markdown: string): string {
 	const component = new AssistantMessageComponent(createAssistantMessage(markdown));
-	return Bun.stripANSI(component.render(120).join("\n"))
+	return stripVTControlCharacters(component.render(120).join("\n"))
 		.split("\n")
 		.map(line => line.trimEnd())
 		.join("\n");
@@ -42,7 +43,7 @@ function renderAssistantThinking(thinking: string): string {
 		...createAssistantMessage(""),
 		content: [{ type: "thinking", thinking }],
 	});
-	return Bun.stripANSI(component.render(240).join("\n"))
+	return stripVTControlCharacters(component.render(240).join("\n"))
 		.split("\n")
 		.map(line => line.trimEnd())
 		.join("\n");

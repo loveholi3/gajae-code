@@ -1,3 +1,4 @@
+import { stripVTControlCharacters } from "node:util";
 import { beforeAll, describe, expect, it } from "bun:test";
 import type { AssistantMessage } from "@gajae-code/ai";
 import { resetSettingsForTest, Settings } from "@gajae-code/coding-agent/config/settings";
@@ -104,8 +105,8 @@ beforeAll(async () => {
 
 describe("redesigned interactive shell chrome", () => {
 	it("renders opencode-style minimal user and gajae turns", () => {
-		const user = Bun.stripANSI(new UserMessageComponent("hello").render(80).join("\n"));
-		const assistant = Bun.stripANSI(
+		const user = stripVTControlCharacters(new UserMessageComponent("hello").render(80).join("\n"));
+		const assistant = stripVTControlCharacters(
 			new AssistantMessageComponent(createAssistantMessage("hi")).render(80).join("\n"),
 		);
 
@@ -125,7 +126,7 @@ describe("redesigned interactive shell chrome", () => {
 		const contentWidths = (lines: string[]) =>
 			lines
 				.map(line =>
-					Bun.stripANSI(line)
+					stripVTControlCharacters(line)
 						.replace(/\x1b\]133;[ABC]\x07/g, "")
 						.trimEnd(),
 				)
@@ -148,7 +149,7 @@ describe("redesigned interactive shell chrome", () => {
 	it("keeps the GJC forge launch surface responsive", () => {
 		const component = new WelcomeComponent("1.2.3", "gpt-5.5", "openai");
 		const lines = component.render(54);
-		const rendered = Bun.stripANSI(lines.join("\n"));
+		const rendered = stripVTControlCharacters(lines.join("\n"));
 
 		expect(rendered).toContain("GJC Forge");
 		expect(rendered).toContain("╭────────────────╮        ╭────────╮");
@@ -163,8 +164,8 @@ describe("redesigned interactive shell chrome", () => {
 		const component = new WelcomeComponent("1.2.3", "gpt-5.5", "openai");
 		const narrowLines = component.render(100);
 		const wideLines = component.render(160);
-		const narrowTop = Bun.stripANSI(narrowLines[0] ?? "");
-		const wideTop = Bun.stripANSI(wideLines[0] ?? "");
+		const narrowTop = stripVTControlCharacters(narrowLines[0] ?? "");
+		const wideTop = stripVTControlCharacters(wideLines[0] ?? "");
 
 		expect(visibleWidth(narrowTop)).toBe(100);
 		expect(visibleWidth(wideTop)).toBe(160);
@@ -178,7 +179,7 @@ describe("redesigned interactive shell chrome", () => {
 	it("renders an ASCII-safe welcome logo when requested", () => {
 		const component = new WelcomeComponent("1.2.3", "gpt-5.5", "openai", [], [], "ascii");
 		const lines = component.render(54);
-		const rendered = Bun.stripANSI(lines.join("\n"));
+		const rendered = stripVTControlCharacters(lines.join("\n"));
 
 		expect(rendered).toContain("+----------------+        +--------+");
 		expect(rendered).toContain("+------+      +--+     +--+  +-----+");
@@ -191,7 +192,7 @@ describe("redesigned interactive shell chrome", () => {
 	it("renders a square-corner Unicode welcome logo when requested", () => {
 		const component = new WelcomeComponent("1.2.3", "gpt-5.5", "openai", [], [], "square");
 		const lines = component.render(54);
-		const rendered = Bun.stripANSI(lines.join("\n"));
+		const rendered = stripVTControlCharacters(lines.join("\n"));
 
 		expect(rendered).toContain("┌────────────────┐        ┌────────┐");
 		expect(rendered).toContain("└────────────────┘        └────────┘");
@@ -218,7 +219,7 @@ describe("redesigned interactive shell chrome", () => {
 		editor.setPaddingX(1);
 		editor.setText("draft");
 
-		const rendered = Bun.stripANSI(editor.render(40).join("\n"));
+		const rendered = stripVTControlCharacters(editor.render(40).join("\n"));
 
 		expect(rendered).toContain("› draft");
 		expect(rendered).not.toContain("╭");
@@ -233,8 +234,8 @@ describe("redesigned interactive shell chrome", () => {
 		editor.setPaddingX(1);
 		editor.setText("draft");
 
-		const statusRendered = Bun.stripANSI(statusLine.render(140).join("\n"));
-		const editorRendered = Bun.stripANSI(editor.render(140).join("\n"));
+		const statusRendered = stripVTControlCharacters(statusLine.render(140).join("\n"));
+		const editorRendered = stripVTControlCharacters(editor.render(140).join("\n"));
 
 		expect(statusRendered).toContain("very-long-model-name-for-footer-budget");
 		expect(statusRendered).toContain("forge-session");
@@ -248,7 +249,7 @@ describe("redesigned interactive shell chrome", () => {
 		const ui = { requestRender: () => {} } as unknown as TUI;
 		const bash = new BashExecutionComponent("printf ready", ui, false);
 		bash.setComplete(0, false, { output: Array.from({ length: 160 }, (_, i) => `line-${i}`).join("\n") });
-		const bashRendered = Bun.stripANSI(bash.render(80).join("\n"));
+		const bashRendered = stripVTControlCharacters(bash.render(80).join("\n"));
 
 		expect(bashRendered).toContain("shell · $ printf");
 		expect(bashRendered).toContain("ctrl+o to expand");
@@ -263,14 +264,14 @@ describe("redesigned interactive shell chrome", () => {
 		const py = new EvalExecutionComponent("print('ready')", ui, false, "python");
 		const js = new EvalExecutionComponent("1 + 1", ui, false, "js");
 
-		expect(Bun.stripANSI(py.render(80).join("\n"))).toContain("python · >>>");
-		expect(Bun.stripANSI(js.render(80).join("\n"))).toContain("node · >>>");
+		expect(stripVTControlCharacters(py.render(80).join("\n"))).toContain("python · >>>");
+		expect(stripVTControlCharacters(js.render(80).join("\n"))).toContain("node · >>>");
 	});
 
 	it("keeps eval continuation aligned for multiline code", () => {
 		const ui = { requestRender: () => {} } as unknown as TUI;
 		const py = new EvalExecutionComponent("print('a')\nprint('b')", ui, false, "python");
-		const stripped = Bun.stripANSI(py.render(80).join("\n"));
+		const stripped = stripVTControlCharacters(py.render(80).join("\n"));
 
 		expect(stripped).toContain("python · >>> print('a')");
 		expect(stripped).toContain("          print('b')");
@@ -288,7 +289,7 @@ describe("redesigned interactive shell chrome", () => {
 	it("budgets footer prefixes before truncating pulse", () => {
 		const footer = new FooterComponent(createFooterSession());
 		const lines = footer.render(72);
-		const rendered = Bun.stripANSI(lines.join("\n"));
+		const rendered = stripVTControlCharacters(lines.join("\n"));
 
 		expect(rendered).toContain("cwd");
 		expect(rendered).toContain("pulse");
@@ -309,7 +310,7 @@ describe("redesigned interactive shell chrome", () => {
 				cost: 4,
 			}),
 		);
-		const rendered = Bun.stripANSI(footer.render(160).join("\n"));
+		const rendered = stripVTControlCharacters(footer.render(160).join("\n"));
 
 		expect(rendered).toContain("↑4K ↓6K R8K W10K");
 		expect(rendered).toContain("$4.000 ★ 3");
@@ -322,7 +323,7 @@ describe("redesigned interactive shell chrome", () => {
 				throw new Error("Footer must not rescan persisted entries");
 			}),
 		);
-		const rendered = Bun.stripANSI(footer.render(160).join("\n"));
+		const rendered = stripVTControlCharacters(footer.render(160).join("\n"));
 
 		expect(rendered).toContain("↑1.2K ↓567 R89 W12 $0.123");
 	});

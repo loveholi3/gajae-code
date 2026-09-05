@@ -1,3 +1,4 @@
+import { stripVTControlCharacters } from "node:util";
 import { Agent } from "@gajae-code/agent-core";
 import { Text } from "@gajae-code/tui";
 import { TempDir } from "@gajae-code/utils";
@@ -187,10 +188,10 @@ export const STICKY_VIEWPORT_FRAME_TEXT_WITNESS: Readonly<Record<StickyViewportS
 // `visible_empty_irc_frame` and every resize probe byte-identical across hosts.
 const captureFrame = (terminal: VirtualTerminal, renderMode: StickyViewportShowcaseEntry["renderMode"]) => {
 	const raw = terminal.getViewportAnsi();
-	const ansi = renderMode === "ascii-no-color" ? Bun.stripANSI(raw) : raw;
+	const ansi = renderMode === "ascii-no-color" ? stripVTControlCharacters(raw) : raw;
 	return {
 		ansi,
-		text: Bun.stripANSI(ansi),
+		text: stripVTControlCharacters(ansi),
 		sha256: new Bun.CryptoHasher("sha256").update(ansi).digest("hex"),
 	};
 };
@@ -443,8 +444,9 @@ export async function renderStickyViewportShowcase(
 		// color form the capture host happened to negotiate. Every consumer below — the
 		// persisted ANSI payload and the recorded cursor frame digest — must use this one
 		// value, or the verifier's `cursor.frame_sha256 !== hash(ansi)` check rejects it.
-		const canonicalAnsi = entry.renderMode === "ascii-no-color" ? Bun.stripANSI(retainedFrame) : retainedFrame;
-		const canonicalText = Bun.stripANSI(retainedFrame);
+		const canonicalAnsi =
+			entry.renderMode === "ascii-no-color" ? stripVTControlCharacters(retainedFrame) : retainedFrame;
+		const canonicalText = stripVTControlCharacters(retainedFrame);
 		const frameSha256 = new Bun.CryptoHasher("sha256").update(canonicalAnsi).digest("hex");
 		const rootOrder = semanticRootIds(mode);
 		const focused = mode.ui.getFocusedComponent();
@@ -513,7 +515,7 @@ export async function renderStickyViewportShowcase(
 							// stripped paint is identical, so the preimage binds the stripped text and
 							// `frame_sha256` stays as a separate artifact-binding field.
 							const frameTextSha256 = new Bun.CryptoHasher("sha256")
-								.update(Bun.stripANSI(canonicalText))
+								.update(stripVTControlCharacters(canonicalText))
 								.digest("hex");
 							const namespace = semanticAnchorNamespace(anchor.id);
 							if (!namespace) throw new Error("semantic anchor id carries no namespace");

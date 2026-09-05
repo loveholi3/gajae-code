@@ -1,3 +1,4 @@
+import { stripVTControlCharacters } from "node:util";
 import { beforeAll, describe, expect, it } from "bun:test";
 import { resetSettingsForTest, Settings } from "@gajae-code/coding-agent/config/settings";
 import { SkillMessageComponent } from "@gajae-code/coding-agent/modes/components/skill-message";
@@ -30,7 +31,7 @@ function render(message: CustomMessage<SkillPromptDetails>, expanded: boolean, w
 	component.setExpanded(expanded);
 	return component
 		.render(width)
-		.map(line => Bun.stripANSI(line))
+		.map(line => stripVTControlCharacters(line))
 		.join("\n");
 }
 
@@ -83,13 +84,13 @@ describe("SkillMessageComponent rendering", () => {
 
 		const narrowOut = component
 			.render(80)
-			.map(line => Bun.stripANSI(line))
+			.map(line => stripVTControlCharacters(line))
 			.join("\n");
 		expect(narrowOut).not.toContain(longArgs);
 
 		const wideOut = component
 			.render(160)
-			.map(line => Bun.stripANSI(line))
+			.map(line => stripVTControlCharacters(line))
 			.join("\n");
 		expect(wideOut).toContain(longArgs);
 	});

@@ -1,3 +1,4 @@
+import { stripVTControlCharacters } from "node:util";
 import { afterEach, beforeEach, describe, expect, it } from "bun:test";
 import * as path from "node:path";
 import type { AssistantMessage, Usage } from "@gajae-code/ai";
@@ -35,7 +36,7 @@ function message(content: AssistantMessage["content"], stopReason?: AssistantMes
 }
 
 function render(component: AssistantMessageComponent): string {
-	return Bun.stripANSI(component.render(120).join("\n"));
+	return stripVTControlCharacters(component.render(120).join("\n"));
 }
 
 function renderedTextLines(component: AssistantMessageComponent): string[] {

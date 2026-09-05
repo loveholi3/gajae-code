@@ -1,3 +1,4 @@
+import { stripVTControlCharacters } from "node:util";
 import { beforeAll, describe, expect, it } from "bun:test";
 import type { AgentMessage } from "@gajae-code/agent-core";
 import { TreeSelectorComponent } from "../../../src/modes/components/tree-selector";
@@ -39,7 +40,7 @@ function renderSelector(tree: SessionTreeNode, leafId: string, width: number): s
 		() => {},
 		() => {},
 	);
-	return selector.render(width).map(line => Bun.stripANSI(line));
+	return selector.render(width).map(line => stripVTControlCharacters(line));
 }
 
 describe("TreeSelectorComponent deep branching overflow", () => {

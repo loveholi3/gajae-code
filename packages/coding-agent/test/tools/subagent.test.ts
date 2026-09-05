@@ -1,3 +1,4 @@
+import { stripVTControlCharacters } from "node:util";
 import { afterEach, describe, expect, it, vi } from "bun:test";
 import * as fs from "node:fs/promises";
 import * as os from "node:os";
@@ -409,7 +410,7 @@ describe("SubagentTool", () => {
 		const theme = await getThemeByName("red-claw");
 		if (!theme) throw new Error("Expected test theme");
 		const render = (value: SubagentToolDetails) =>
-			Bun.stripANSI(
+			stripVTControlCharacters(
 				subagentToolRenderer
 					.renderResult(
 						{ content: [{ type: "text", text: "" }], details: value },
@@ -492,7 +493,7 @@ describe("SubagentTool", () => {
 		const details = result.details as SubagentToolDetails;
 		for (const isPartial of [true, false]) {
 			const width = 64;
-			const rendered = Bun.stripANSI(
+			const rendered = stripVTControlCharacters(
 				subagentToolRenderer
 					.renderResult({ content: [{ type: "text", text: "" }], details }, { expanded: true, isPartial }, theme)
 					.render(width)
@@ -524,7 +525,7 @@ describe("SubagentTool", () => {
 				},
 			],
 		};
-		const rendered = Bun.stripANSI(
+		const rendered = stripVTControlCharacters(
 			subagentToolRenderer
 				.renderResult(
 					{ content: [{ type: "text", text: "" }], details },
@@ -557,7 +558,7 @@ describe("SubagentTool", () => {
 			],
 		});
 		const render = (value: SubagentToolDetails) =>
-			Bun.stripANSI(
+			stripVTControlCharacters(
 				subagentToolRenderer
 					.renderResult(
 						{ content: [{ type: "text", text: "" }], details: value },
